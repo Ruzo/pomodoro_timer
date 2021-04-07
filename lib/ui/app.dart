@@ -7,7 +7,15 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: AppTheme.darkTheme,
-      home: TimerScreen(),
+      home: LayoutBuilder(
+        builder: (context, constraints) {
+          print(constraints.toString());
+          // constraints.constrain(
+          //   Size(385.0, 832.0),
+          // );
+          return TimerScreen();
+        },
+      ),
     );
   }
 }

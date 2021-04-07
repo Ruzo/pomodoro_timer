@@ -11,13 +11,19 @@ class CurrentTask extends StatelessWidget {
       width: double.infinity,
       child: Padding(
         padding: const EdgeInsets.all(18.0),
-        child: Text(
-          'Task: Work on Pomodoro timer',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w100,
-          ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Task: Work on Pomodoro timer',
+              style: TextStyle(
+                color: Colors.white.withOpacity(.85),
+                fontSize: 18,
+                fontWeight: FontWeight.w100,
+              ),
+            ),
+            Icon(Icons.edit_outlined),
+          ],
         ),
       ),
     );

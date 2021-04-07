@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pomodoro_timer/ui/timer/current_task.dart';
+import 'package:pomodoro_timer/ui/timer/timer_interface.dart';
 
 class TimerScreen extends StatelessWidget {
   @override
@@ -15,16 +16,23 @@ class TimerScreen extends StatelessWidget {
               'Pomodoro Timer',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
+                color: Colors.white70,
               ),
             ),
           ),
         ),
         body: Padding(
           padding: const EdgeInsets.all(20.0),
-          child: Column(
-            children: [
-              CurrentTask(),
-            ],
+          child: Container(
+            width: 385.0,
+            height: 832.0,
+            child: Column(
+              children: [
+                CurrentTask(),
+                Padding(padding: const EdgeInsets.all(30.0)),
+                TimerInterface(),
+              ],
+            ),
           ),
         ),
       ),
