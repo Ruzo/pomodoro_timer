@@ -22,9 +22,6 @@ class _TimerInterfaceState extends State<TimerInterface> {
           child: Container(
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              // border: Border.all(
-              //   color: Colors.white,
-              // ),
             ),
             child: Center(
               child: Text(
@@ -47,14 +44,18 @@ class TimerPainter extends CustomPainter {
   Duration mins = Duration(minutes: 20);
   Duration currentTime = Duration(minutes: 15, seconds: 0, milliseconds: 0);
 
-  // Start and End angles
-  // double startAngle = 270 * (pi / 180);
+  // Start, sweep and current angles
   double startAngle = 0.0;
   double sweepAngle = (2 * pi);
   double currentAngle(Duration totalTime, Duration currentTimePos) {
     double angle = currentTimePos.inMilliseconds / totalTime.inMilliseconds;
-    // print(angle);
     return angle;
+  }
+
+  double progressSweepAngle(Duration totalTime, Duration currentTimePos) {
+    double progressAngle = ((2 * pi) / totalTime.inMilliseconds) * currentTimePos.inMilliseconds;
+    print(progressAngle);
+    return progressAngle;
   }
 
   @override
@@ -77,7 +78,6 @@ class TimerPainter extends CustomPainter {
 
     //# Background progress indicator filler
     Paint timerBkgPaint = Paint()
-      // ..color = kBackgroundLiteColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = 40
       ..strokeCap = StrokeCap.butt
@@ -142,6 +142,53 @@ class TimerPainter extends CustomPainter {
       center,
       radius - 40,
       centerCirclePaint,
+    );
+
+    //# Circle @ Progress Indicator line pos
+    double radians = progressSweepAngle(mins, currentTime);
+
+    Paint progressPosCirclePaint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.fill;
+
+    Paint progressPosCircleBorderPaint = Paint()
+      ..color = kPrimaryColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 5
+      ..maskFilter = MaskFilter.blur(BlurStyle.inner, 1);
+
+    canvas.drawShadow(
+      Path()
+        ..addOval(
+          Rect.fromCircle(
+            center: Offset(
+              center.dx + (radius - 35) * cos(radians),
+              center.dy + (radius - 35) * sin(radians),
+            ),
+            radius: 11,
+          ),
+        ),
+      kBackgroundColor.withOpacity(.5),
+      1,
+      false,
+    );
+
+    canvas.drawCircle(
+      Offset(
+        center.dx + (radius - 35) * cos(radians),
+        center.dy + (radius - 35) * sin(radians),
+      ),
+      9,
+      progressPosCirclePaint,
+    );
+
+    canvas.drawCircle(
+      Offset(
+        center.dx + (radius - 35) * cos(radians),
+        center.dy + (radius - 35) * sin(radians),
+      ),
+      9,
+      progressPosCircleBorderPaint,
     );
   }
 
