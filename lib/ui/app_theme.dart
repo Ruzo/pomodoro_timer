@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+// import 'package:google_fonts/google_fonts.dart';
 import 'package:pomodoro_timer/constants.dart';
 
 class AppTheme {
@@ -7,6 +7,6 @@ class AppTheme {
     backgroundColor: kBackgroundColor,
     primaryColor: kPrimaryColor,
     accentColor: kAccentColor,
-    textTheme: GoogleFonts.quicksandTextTheme(),
+    textTheme: ThemeData.dark().textTheme.apply(fontFamily: 'AvenirNext'),
   );
 }

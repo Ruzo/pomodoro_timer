@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:pomodoro_timer/constants.dart';
@@ -9,69 +11,115 @@ class TimerInterface extends StatefulWidget {
 }
 
 class _TimerInterfaceState extends State<TimerInterface> {
+  final Stopwatch _stopwatch = Stopwatch();
+  late Timer _timer;
+  Duration _currentTime = Duration.zero;
+  Duration _totalTime = Duration(minutes: 1);
+  bool _firstBuild = true;
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (_firstBuild) {
+      _stopwatch.start();
+      setState(() {
+        _timer = Timer.periodic(Duration(milliseconds: 1), (_) {
+          setState(() {
+            _currentTime = _stopwatch.elapsed;
+            if (_currentTime >= _totalTime) {
+              _stopwatch.stop();
+              _timer.cancel();
+            }
+          });
+        });
+        _firstBuild = false;
+      });
+    }
     return FittedBox(
       alignment: Alignment.center,
       fit: BoxFit.fitWidth,
       child: SizedBox(
         width: 300,
         height: 300,
-        child: CustomPaint(
-          painter: TimerPainter(),
-          child: Container(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-            ),
-            child: Center(
-              child: Text(
-                '15:00',
-                style: TextStyle(
-                  color: Colors.white.withOpacity(.85),
-                  fontSize: 50,
-                ),
-              ),
-            ),
-          ),
+        child: _paintTimer(
+          _totalTime,
+          _currentTime,
         ),
       ),
     );
   }
 }
 
+Widget _paintTimer(Duration totalDuration, Duration currentDuration) {
+  int total = totalDuration.inMilliseconds;
+  int current = currentDuration.inMilliseconds;
+  List<String> timeChars = currentDuration.toString().split('.').first.split(':').sublist(1);
+
+  Widget counterText(String text) {
+    return Text(
+      text,
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        color: Colors.white.withOpacity(.85),
+        fontSize: 50,
+        fontFeatures: [
+          FontFeature.tabularFigures(),
+        ],
+      ),
+    );
+  }
+
+  return CustomPaint(
+    painter: TimerPainter(
+      totalMs: total,
+      currentMs: current,
+    ),
+    child: Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+      ),
+      child: Center(
+        child: counterText(timeChars.join(':')),
+      ),
+    ),
+  );
+}
+
 class TimerPainter extends CustomPainter {
-  // Current time values
-  Duration mins = Duration(minutes: 20);
-  Duration currentTime = Duration(minutes: 15, seconds: 0, milliseconds: 0);
+  final int totalMs;
+  final int currentMs;
+  double progressSweepAngle = 0.0;
+  double currentAngle = 0.0;
 
-  // Start, sweep and current angles
-  double startAngle = 0.0;
-  double sweepAngle = (2 * pi);
-  double currentAngle(Duration totalTime, Duration currentTimePos) {
-    double angle = currentTimePos.inMilliseconds / totalTime.inMilliseconds;
-    return angle;
+  TimerPainter({this.totalMs = 0, this.currentMs = 0}) {
+    progressSweepAngle = ((2 * pi) / totalMs) * currentMs;
+    currentAngle = currentMs / totalMs;
   }
 
-  double progressSweepAngle(Duration totalTime, Duration currentTimePos) {
-    double progressAngle = ((2 * pi) / totalTime.inMilliseconds) * currentTimePos.inMilliseconds;
-    print(progressAngle);
-    return progressAngle;
-  }
+  // Start and sweep
+  final double startAngle = 0.0;
+  final double sweepAngle = (2 * pi);
 
   @override
   void paint(Canvas canvas, Size size) {
-    print(size);
-    Offset center = Offset(size.width / 2, size.height / 2);
-    double radius = min(size.width, size.height) / 2;
+    final Offset center = size.center(Offset.zero);
+    final double radius = min(size.width, size.height) / 2;
+    final double centerX = size.width / 2;
+    final double centerY = size.height / 2;
 
-    canvas.translate(size.width / 2, size.height / 2);
+    canvas.translate(centerX, centerY);
     canvas.rotate(1.5 * pi);
-    canvas.translate(-(size.width / 2), -(size.height / 2));
+    canvas.translate(-centerX, -centerY);
 
     //# Background layer
     Paint backgroundPaint = Paint()..color = kAccentColor.withAlpha(30);
     canvas.drawCircle(
-      Offset(size.width / 2, size.height / 2),
+      center,
       radius,
       backgroundPaint,
     );
@@ -86,12 +134,17 @@ class TimerPainter extends CustomPainter {
         endAngle: 2 * pi,
         tileMode: TileMode.clamp,
         colors: [kBackgroundLiteColor, Colors.transparent],
-        stops: [currentAngle(mins, currentTime), currentAngle(mins, currentTime)],
-      ).createShader(Rect.fromCircle(center: center, radius: radius - 20));
+        stops: [
+          currentAngle,
+          currentAngle,
+        ],
+      ).createShader(
+        Rect.fromCircle(center: center, radius: radius - 20),
+      );
 
     canvas.drawArc(
       Rect.fromCircle(
-        center: Offset(size.width / 2, size.height / 2),
+        center: center,
         radius: radius - 20,
       ),
       startAngle,
@@ -108,14 +161,20 @@ class TimerPainter extends CustomPainter {
       ..shader = SweepGradient(
         startAngle: 0.0,
         endAngle: 2 * pi,
-        colors: [Colors.transparent, kPrimaryColor, kPrimaryColor, Colors.transparent],
+        colors: [
+          kPrimaryColor.withOpacity(.05),
+          kPrimaryColor,
+          kPrimaryColor,
+          Colors.transparent,
+        ],
         stops: [
           0.0,
-          currentAngle(mins, currentTime) / 2,
-          currentAngle(mins, currentTime),
-          currentAngle(mins, currentTime),
+          currentAngle / 2,
+          currentAngle,
+          currentAngle,
         ],
-      ).createShader(Rect.fromCircle(center: center, radius: radius - 35));
+      ).createShader(Rect.fromCircle(center: center, radius: radius - 35))
+      ..maskFilter = MaskFilter.blur(BlurStyle.normal, 2);
 
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: radius - 35),
@@ -144,8 +203,8 @@ class TimerPainter extends CustomPainter {
       centerCirclePaint,
     );
 
-    //# Circle @ Progress Indicator line pos
-    double radians = progressSweepAngle(mins, currentTime);
+    //# Thumb @ Progress Indicator line pos
+    double radians = progressSweepAngle;
 
     Paint progressPosCirclePaint = Paint()
       ..color = Colors.white
@@ -193,7 +252,7 @@ class TimerPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return false;
+  bool shouldRepaint(TimerPainter oldDelegate) {
+    return currentMs != oldDelegate.currentMs;
   }
 }

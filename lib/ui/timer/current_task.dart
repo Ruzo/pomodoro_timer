@@ -14,12 +14,15 @@ class CurrentTask extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              'Task: Work on Pomodoro timer',
-              style: TextStyle(
-                color: Colors.white.withOpacity(.85),
-                fontSize: 18,
-                fontWeight: FontWeight.w100,
+            Flexible(
+              child: Text(
+                'Task: Work on Pomodoro timer',
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: Colors.white.withOpacity(.85),
+                  fontSize: 20,
+                  fontWeight: FontWeight.w100,
+                ),
               ),
             ),
             Icon(Icons.edit_outlined),

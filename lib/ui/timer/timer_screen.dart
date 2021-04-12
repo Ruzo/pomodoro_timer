@@ -13,25 +13,27 @@ class TimerScreen extends StatelessWidget {
           backgroundColor: Theme.of(context).backgroundColor,
           title: Center(
             child: Text(
-              'Pomodoro Timer',
+              'Pomodoro timer',
               style: TextStyle(
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w700,
                 color: Colors.white70,
               ),
             ),
           ),
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Container(
-            width: 385.0,
-            height: 832.0,
-            child: Column(
-              children: [
-                CurrentTask(),
-                Padding(padding: const EdgeInsets.all(30.0)),
-                TimerInterface(),
-              ],
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Container(
+              width: 385.0,
+              height: 832.0,
+              child: Column(
+                children: [
+                  CurrentTask(),
+                  Padding(padding: const EdgeInsets.all(30.0)),
+                  TimerInterface(),
+                ],
+              ),
             ),
           ),
         ),
