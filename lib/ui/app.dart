@@ -9,10 +9,6 @@ class App extends StatelessWidget {
       theme: AppTheme.darkTheme,
       home: LayoutBuilder(
         builder: (context, constraints) {
-          print(constraints.toString());
-          // constraints.constrain(
-          //   Size(385.0, 832.0),
-          // );
           return TimerScreen();
         },
       ),

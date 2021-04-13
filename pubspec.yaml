@@ -59,9 +59,9 @@ flutter:
         #   style: normal
         # - asset: fonts/CourierPrime-Bold.ttf
         #   weight: 700
-    - family: IngridMono-Light
-      fonts:
-        - asset: fonts/IngridMono-Light.otf
+    # - family: IngridMono-Light
+    #   fonts:
+    #     - asset: fonts/IngridMono-Light.otf
   #       - asset: fonts/TrajanPro_Bold.ttf
   #         weight: 700
   #
