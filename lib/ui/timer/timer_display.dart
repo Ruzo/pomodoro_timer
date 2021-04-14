@@ -13,7 +13,7 @@ class _TimerDisplayState extends State<TimerDisplay> {
   final Stopwatch _stopwatch = Stopwatch();
   late Timer _timer;
   Duration _currentTime = Duration.zero;
-  Duration _totalTime = Duration(minutes: 1);
+  Duration _totalTime = Duration(minutes: 7);
   bool _firstBuild = true;
 
   @override

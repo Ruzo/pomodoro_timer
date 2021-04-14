@@ -88,7 +88,7 @@ class TimerPainter extends CustomPainter {
           currentAngle,
         ],
       ).createShader(Rect.fromCircle(center: center, radius: progressLineRadius))
-      ..maskFilter = MaskFilter.blur(BlurStyle.normal, 2);
+      ..maskFilter = MaskFilter.blur(BlurStyle.normal, 1);
 
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: progressLineRadius),

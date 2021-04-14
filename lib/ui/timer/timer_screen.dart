@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pomodoro_timer/ui/timer/current_task.dart';
+import 'package:pomodoro_timer/ui/timer/pomodoro_indicator.dart';
 import 'package:pomodoro_timer/ui/timer/timer_display.dart';
 
 class TimerScreen extends StatelessWidget {
@@ -32,6 +33,8 @@ class TimerScreen extends StatelessWidget {
                   CurrentTask(),
                   Padding(padding: const EdgeInsets.all(30.0)),
                   TimerDisplay(),
+                  Padding(padding: const EdgeInsets.all(20.0)),
+                  PomodoroIndicator(),
                 ],
               ),
             ),
