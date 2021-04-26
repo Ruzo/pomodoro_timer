@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:pomodoro_timer/ui/app_theme.dart';
-import 'package:pomodoro_timer/ui/timer/timer_screen.dart';
+import 'package:pomodoro_timer/app_theme.dart';
+import 'package:pomodoro_timer/timer/timer_screen.dart';
 
 class App extends StatelessWidget {
   @override

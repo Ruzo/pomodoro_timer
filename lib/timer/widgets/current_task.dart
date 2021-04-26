@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 
 class CurrentTask extends StatelessWidget {
+  final String title;
+
+  const CurrentTask({Key? key, required this.title}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -16,7 +20,7 @@ class CurrentTask extends StatelessWidget {
           children: [
             Flexible(
               child: Text(
-                'Task: Work on Pomodoro timer',
+                'Task: $title',
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: Colors.white.withOpacity(.85),

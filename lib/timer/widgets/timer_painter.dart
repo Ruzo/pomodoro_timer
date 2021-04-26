@@ -6,10 +6,16 @@ import 'package:pomodoro_timer/constants.dart';
 class TimerPainter extends CustomPainter {
   final int totalMs;
   final int currentMs;
+  final SessionType sessionType;
   double progressSweepAngle = 0.0;
   double currentAngle = 0.0;
+  Path progressPosCirclePath = Path();
 
-  TimerPainter({this.totalMs = 0, this.currentMs = 0}) {
+  TimerPainter({
+    required this.totalMs,
+    required this.currentMs,
+    required this.sessionType,
+  }) {
     progressSweepAngle = ((kSweepAngle) / totalMs) * currentMs;
     currentAngle = currentMs / totalMs;
   }
@@ -68,6 +74,7 @@ class TimerPainter extends CustomPainter {
     );
 
     //# Progress Indicator line
+    Color progressColor = sessionType == SessionType.pomodoro ? kPrimaryColor : kAlternateColor;
     final Paint progressLinePaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 8
@@ -76,9 +83,9 @@ class TimerPainter extends CustomPainter {
         startAngle: kStartAngle,
         endAngle: kSweepAngle,
         colors: [
-          kPrimaryColor.withOpacity(.05),
-          kPrimaryColor,
-          kPrimaryColor,
+          progressColor.withOpacity(.05),
+          progressColor,
+          progressColor,
           Colors.transparent,
         ],
         stops: [
@@ -103,7 +110,7 @@ class TimerPainter extends CustomPainter {
       ..color = kBackgroundColor
       ..style = PaintingStyle.fill;
     final Paint centerCircleGlowPaint = Paint()
-      ..color = kPrimaryColor.withOpacity(0.5)
+      ..color = progressColor.withOpacity(0.5)
       ..maskFilter = MaskFilter.blur(BlurStyle.normal, 20);
 
     canvas.drawCircle(
@@ -125,22 +132,24 @@ class TimerPainter extends CustomPainter {
       ..style = PaintingStyle.fill;
 
     final Paint progressPosCircleBorderPaint = Paint()
-      ..color = kPrimaryColor
+      ..color = progressColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = 5
       ..maskFilter = MaskFilter.blur(BlurStyle.inner, 1);
 
-    canvas.drawShadow(
-      Path()
-        ..addOval(
-          Rect.fromCircle(
-            center: Offset(
-              thumbCenterDx,
-              thumbCenterDy,
-            ),
-            radius: 11,
+    progressPosCirclePath = Path()
+      ..addOval(
+        Rect.fromCircle(
+          center: Offset(
+            thumbCenterDx,
+            thumbCenterDy,
           ),
+          radius: 11,
         ),
+      );
+
+    canvas.drawShadow(
+      progressPosCirclePath,
       kBackgroundColor.withOpacity(.5),
       1,
       false,
@@ -163,6 +172,11 @@ class TimerPainter extends CustomPainter {
       9,
       progressPosCircleBorderPaint,
     );
+  }
+
+  @override
+  bool hitTest(Offset position) {
+    return progressPosCirclePath.contains(position);
   }
 
   @override
