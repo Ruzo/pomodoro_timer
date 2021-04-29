@@ -64,30 +64,38 @@ class TimerWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => print('tapped!'),
+      // onTap: () => print('tapped!'),
+      onLongPressStart: (details) {
+        print(details.localPosition);
+      },
+      onLongPressMoveUpdate: (details) {
+        print(details.localOffsetFromOrigin);
+      },
       child: CustomPaint(
+        key: Key('painter'),
         isComplex: true,
-        // willChange: isRunning,
         painter: TimerPainter(
           totalMs: total,
           currentMs: current,
           sessionType: session.type,
         ),
-        child: Container(
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-          ),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Padding(padding: EdgeInsets.all(15)),
-                CounterText(text: timeChars.join(':')),
-                TotalTimeText(
-                  totalMinutes: totalDuration.inMinutes,
-                  session: session,
-                ),
-              ],
+        child: IgnorePointer(
+          child: Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+            ),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Padding(padding: EdgeInsets.all(15)),
+                  CounterText(text: timeChars.join(':')),
+                  TotalTimeText(
+                    totalMinutes: totalDuration.inMinutes,
+                    session: session,
+                  ),
+                ],
+              ),
             ),
           ),
         ),

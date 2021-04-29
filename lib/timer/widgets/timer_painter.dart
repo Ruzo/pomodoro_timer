@@ -9,7 +9,7 @@ class TimerPainter extends CustomPainter {
   final SessionType sessionType;
   double progressSweepAngle = 0.0;
   double currentAngle = 0.0;
-  Path progressPosCirclePath = Path();
+  Path _hitPath = Path();
 
   TimerPainter({
     required this.totalMs,
@@ -127,6 +127,7 @@ class TimerPainter extends CustomPainter {
     //# Thumb @ Progress Indicator line pos
     final double thumbCenterDx = center.dx + (progressLineRadius) * cos(thumbRadians);
     final double thumbCenterDy = center.dy + (progressLineRadius) * sin(thumbRadians);
+    print('ThumbX: $thumbCenterDx, ThumbY: $thumbCenterDy');
     final Paint progressPosCirclePaint = Paint()
       ..color = Colors.white
       ..style = PaintingStyle.fill;
@@ -137,7 +138,7 @@ class TimerPainter extends CustomPainter {
       ..strokeWidth = 5
       ..maskFilter = MaskFilter.blur(BlurStyle.inner, 1);
 
-    progressPosCirclePath = Path()
+    final Path progressPosCirclePath = Path()
       ..addOval(
         Rect.fromCircle(
           center: Offset(
@@ -172,11 +173,26 @@ class TimerPainter extends CustomPainter {
       9,
       progressPosCircleBorderPaint,
     );
+
+    _hitPath = Path()
+      ..addOval(
+        Rect.fromCircle(
+            //! hitTest path Offset does not take canvas rotation into account
+            center: Offset(
+              center.dx + (progressLineRadius) * sin(thumbRadians),
+              center.dy - (progressLineRadius) * cos(thumbRadians),
+            ),
+            radius: 20),
+      );
+
+    print(
+        'HitX: ${center.dx + (progressLineRadius) * sin(thumbRadians)} HitY: ${center.dy - (progressLineRadius) * cos(thumbRadians)}');
   }
 
   @override
   bool hitTest(Offset position) {
-    return progressPosCirclePath.contains(position);
+    bool _hit = _hitPath.contains(position);
+    return _hit;
   }
 
   @override

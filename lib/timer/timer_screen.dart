@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get_it_mixin/get_it_mixin.dart';
 import 'package:pomodoro_timer/tasks/_model/Session.dart';
-// import 'package:pomodoro_timer/tasks/_model/task.dart';
 import 'package:pomodoro_timer/tasks/_services/tasks_service.dart';
 import 'package:pomodoro_timer/timer/widgets/controls.dart';
 import 'package:pomodoro_timer/timer/widgets/current_task.dart';
@@ -13,12 +12,8 @@ class TimerScreen extends StatelessWidget with GetItMixin {
   Widget build(BuildContext context) {
     var ts = get<TasksService>();
     final isInitialized = watchX((TasksService s) => s.dataIsInitialized);
-    // Task _currentTask = ts.selectedTask;
     List<Session> _sessions = ts.sessions;
     final _currentSession = watchX((TasksService s) => s.currentSessionIndex);
-    // final _taskIsDone = watchX((TasksService s) => s.taskIsDone);
-
-    // if (isInitialized) print('TotalTime: ${_sessions[_currentSession].duration}');
 
     return SafeArea(
       child: Scaffold(
@@ -57,7 +52,6 @@ class TimerScreen extends StatelessWidget with GetItMixin {
                           PomodoroIndicator(
                             sessions: _sessions,
                             currentSession: _currentSession,
-                            // taskIsDone: _taskIsDone,
                           ),
                           Padding(padding: const EdgeInsets.all(30.0)),
                           Controls(),
