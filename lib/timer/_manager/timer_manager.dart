@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter_command/flutter_command.dart';
 import 'package:get_it/get_it.dart';
 import 'package:pomodoro_timer/tasks/_manager/tasks_manager.dart';
@@ -13,7 +14,8 @@ class TimerManager {
   late Command<void, void> stopTimer;
   late Command<void, void> resetTimer;
   late Command<void, void> cancelTimer;
-  late Command<bool, bool> endOfSession;
+  late Command<Offset, bool> dragStarted;
+  late Command<Offset, Offset> updateDragPosition;
 
   var tms = GetIt.I<TimerService>();
   var tks = GetIt.I<TasksService>();
@@ -23,14 +25,14 @@ class TimerManager {
     // restart or cancel timer when session total time is reached
     tms.currentTime.listen((currentTime, _) {
       if (currentTime >= tks.currentSession.duration) {
-        endOfSession(true);
         tkm.sessionEnded();
-        if (tks.taskIsDone.value)
+        if (tkm.taskIsDone.value)
           cancelTimer();
         else
           resetTimer();
       }
     });
+
     // Start periodic timer to update currentTime with Stopwatch elapsed time.
     initTimer = Command.createSyncNoParam<bool>(
       tms.init,
@@ -42,7 +44,6 @@ class TimerManager {
         tms.start();
         print('timer started');
       },
-      restriction: tks.disableStart,
     );
 
     stopTimer = Command.createSyncNoParamNoResult(
@@ -79,7 +80,14 @@ class TimerManager {
       },
     );
 
-    endOfSession = Command.createSync((status) => status, false);
+    dragStarted = Command.createSync((position) {
+      print('longPressed started at: ${position.toString()}');
+      return true;
+    }, false);
+
+    updateDragPosition = Command.createSync((position) {
+      return position;
+    }, Offset.zero);
 
     initTimer();
   }

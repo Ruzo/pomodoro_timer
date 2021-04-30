@@ -3,6 +3,7 @@ import 'package:pomodoro_timer/tasks/_model/task.dart';
 
 class MockData {
   List<Task> tasksList;
+  String selectedTaskID = '';
 
   MockData()
       : tasksList = [
@@ -20,5 +21,7 @@ class MockData {
           ),
           Task(title: 'Work on Pomodoro timer'),
           Task(title: 'Write about learning experience'),
-        ];
+        ] {
+    selectedTaskID = tasksList[0].id;
+  }
 }

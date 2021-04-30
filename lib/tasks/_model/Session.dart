@@ -24,6 +24,13 @@ class Session {
     );
   }
 
+  factory Session.pomodoro() {
+    return Session(
+      duration: Duration(minutes: 25),
+      type: SessionType.pomodoro,
+    );
+  }
+
   Map<String, dynamic> toMap() {
     return {
       'duration': duration,

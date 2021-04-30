@@ -19,9 +19,6 @@ class TimerService {
   ValueNotifier<bool> _timerIsRunning = ValueNotifier<bool>(false);
   ValueNotifier<bool> get timerIsRunning => _timerIsRunning;
 
-  ValueNotifier<bool> _endOfSession = ValueNotifier<bool>(false);
-  ValueNotifier<bool> get endOfSession => _endOfSession;
-
   bool get timerIsTicking => _ticker.isTicking;
 
   var ts = GetIt.I<TasksService>();
@@ -54,7 +51,6 @@ class TimerService {
   void start() {
     if (!_paused) _timeAtZero = DateTime.now();
     _timeOffset += _paused ? DateTime.now().difference(_stopTime) : Duration.zero;
-    print('_timeOffset: $_timeOffset');
     _ticker.start();
     _timerIsRunning.value = _ticker.isActive;
   }
@@ -75,7 +71,6 @@ class TimerService {
     _timeAtZero = DateTime.now();
     _ticker.muted = false;
     _timerIsRunning.value = _ticker.isActive;
-    // start();
   }
 
   void cancelTimer() {

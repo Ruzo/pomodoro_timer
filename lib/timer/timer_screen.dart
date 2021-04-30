@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get_it_mixin/get_it_mixin.dart';
+import 'package:pomodoro_timer/tasks/_manager/tasks_manager.dart';
 import 'package:pomodoro_timer/tasks/_model/Session.dart';
 import 'package:pomodoro_timer/tasks/_services/tasks_service.dart';
 import 'package:pomodoro_timer/timer/widgets/controls.dart';
@@ -11,7 +12,7 @@ class TimerScreen extends StatelessWidget with GetItMixin {
   @override
   Widget build(BuildContext context) {
     var ts = get<TasksService>();
-    final isInitialized = watchX((TasksService s) => s.dataIsInitialized);
+    final isInitializing = watchX((TasksManager tm) => tm.initData.isExecuting);
     List<Session> _sessions = ts.sessions;
     final _currentSession = watchX((TasksService s) => s.currentSessionIndex);
 
@@ -35,7 +36,7 @@ class TimerScreen extends StatelessWidget with GetItMixin {
           child: Center(
             child: Padding(
               padding: const EdgeInsets.all(20.0),
-              child: !isInitialized
+              child: isInitializing
                   ? CircularProgressIndicator()
                   : Container(
                       child: Column(

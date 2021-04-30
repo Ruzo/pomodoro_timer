@@ -127,7 +127,7 @@ class TimerPainter extends CustomPainter {
     //# Thumb @ Progress Indicator line pos
     final double thumbCenterDx = center.dx + (progressLineRadius) * cos(thumbRadians);
     final double thumbCenterDy = center.dy + (progressLineRadius) * sin(thumbRadians);
-    print('ThumbX: $thumbCenterDx, ThumbY: $thumbCenterDy');
+    // print('ThumbX: $thumbCenterDx, ThumbY: $thumbCenterDy');
     final Paint progressPosCirclePaint = Paint()
       ..color = Colors.white
       ..style = PaintingStyle.fill;
@@ -138,19 +138,17 @@ class TimerPainter extends CustomPainter {
       ..strokeWidth = 5
       ..maskFilter = MaskFilter.blur(BlurStyle.inner, 1);
 
-    final Path progressPosCirclePath = Path()
-      ..addOval(
-        Rect.fromCircle(
-          center: Offset(
-            thumbCenterDx,
-            thumbCenterDy,
-          ),
-          radius: 11,
-        ),
-      );
-
     canvas.drawShadow(
-      progressPosCirclePath,
+      Path()
+        ..addOval(
+          Rect.fromCircle(
+            center: Offset(
+              thumbCenterDx,
+              thumbCenterDy,
+            ),
+            radius: 11,
+          ),
+        ),
       kBackgroundColor.withOpacity(.5),
       1,
       false,
@@ -177,7 +175,7 @@ class TimerPainter extends CustomPainter {
     _hitPath = Path()
       ..addOval(
         Rect.fromCircle(
-            //! hitTest path Offset does not take canvas rotation into account
+            //! hitTest path Offset does not take canvas translate and rotation into account
             center: Offset(
               center.dx + (progressLineRadius) * sin(thumbRadians),
               center.dy - (progressLineRadius) * cos(thumbRadians),
@@ -185,8 +183,8 @@ class TimerPainter extends CustomPainter {
             radius: 20),
       );
 
-    print(
-        'HitX: ${center.dx + (progressLineRadius) * sin(thumbRadians)} HitY: ${center.dy - (progressLineRadius) * cos(thumbRadians)}');
+    // print(
+    //     'HitX: ${center.dx + (progressLineRadius) * sin(thumbRadians)} HitY: ${center.dy - (progressLineRadius) * cos(thumbRadians)}');
   }
 
   @override

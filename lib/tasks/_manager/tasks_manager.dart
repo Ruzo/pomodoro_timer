@@ -1,55 +1,62 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_command/flutter_command.dart';
 import 'package:get_it/get_it.dart';
 import 'package:pomodoro_timer/tasks/_model/task.dart';
 import 'package:pomodoro_timer/tasks/_services/tasks_service.dart';
-// import 'package:pomodoro_timer/timer/_manager/timer_manager.dart';
-// import 'package:pomodoro_timer/timer/_services/timer_service.dart';
 
-class TasksManager {
-  late Command<void, bool> initData;
+class TasksManager extends ChangeNotifier {
+  late Command<void, void> initData;
   late Command<void, Task> getCurrentTask;
   late Command<Task, void> setCurrentTask;
   late Command<String, Task> getTaskById;
   late Command<void, List<Task>> getTasksList;
   late Command<void, bool> sessionEnded;
+  late Command<bool, bool> dataIsInitialized;
+  late Command<bool, bool> taskIsDone;
 
-  // var ts = GetIt.I<TasksService>();
-  // var tms = GetIt.I<TimerService>();
-  // var tmm = GetIt.I<TimerManager>();
+  Task _selectedTask = Task();
+  bool _lastSession = false;
 
   TasksManager() {
     var ts = GetIt.I<TasksService>();
-    // var tms = GetIt.I<TimerService>();
-    // var tmm = GetIt.I<TimerManager>();
-    initData = Command.createAsyncNoParam(() => ts.init(), false);
+
+    initData = Command.createAsyncNoParamNoResult(() async {
+      print('Init Task');
+      _selectedTask = await ts.init();
+      if (ts.currentSessionIndex.value == _selectedTask.sessions.length - 1) _lastSession = true;
+      dataIsInitialized(true);
+    });
 
     getCurrentTask = Command.createAsyncNoParam<Task>(() async {
-      if (!ts.dataIsInitialized.value) await ts.init();
-      return ts.selectedTask;
+      return _selectedTask;
     }, ts.defaultTask);
 
-    setCurrentTask = Command.createSyncNoResult((task) => ts.selectNewTask(task));
+    setCurrentTask = Command.createSyncNoResult((task) => _selectedTask = task);
 
     getTaskById = Command.createAsync((id) => ts.taskById(id), Task());
 
-    getTasksList = Command.createAsyncNoParam(() => ts.data, []);
+    getTasksList = Command.createSyncNoParam(() => ts.taskList, []);
 
     getTaskById.thrownExceptions.listen((ex, _) => print('${ex?.error}'));
 
     sessionEnded = Command.createSyncNoParam(() {
-      if (!ts.taskIsDone.value) {
-        bool _taskIsDone = ts.nextSession();
-        if (_taskIsDone) return true;
-        // tms.reset();
-        // tms.start();
+      if (!taskIsDone.value) {
+        ts.setSessionAsDone(ts.currentSessionIndex.value);
+        if (_lastSession) {
+          taskIsDone(true);
+          ts.currentSessionIndex.notifyListeners();
+          return true;
+        }
+        ts.setCurrentSessionIndex(ts.currentSessionIndex.value + 1);
+        if (ts.currentSessionIndex.value == _selectedTask.sessions.length - 1) _lastSession = true;
       }
       return false;
     }, false);
 
-    initData();
+    dataIsInitialized = Command.createSync((b) => b, false);
 
-    // tms.endOfSession.listen((endOfSession, _) {
-    //   if (endOfSession) sessionEnded();
-    // });
+    taskIsDone = Command.createSync((b) => b, false);
+
+    initData();
   }
 }

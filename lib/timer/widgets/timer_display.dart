@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it_mixin/get_it_mixin.dart';
 import 'package:pomodoro_timer/constants.dart';
 import 'package:pomodoro_timer/tasks/_model/Session.dart';
+import 'package:pomodoro_timer/timer/_manager/timer_manager.dart';
 import 'package:pomodoro_timer/timer/_services/timer_service.dart';
 import 'package:pomodoro_timer/timer/widgets/timer_painter.dart';
 
@@ -40,7 +41,7 @@ class TimerDisplay extends StatelessWidget with GetItMixin {
   }
 }
 
-class TimerWidget extends StatelessWidget {
+class TimerWidget extends StatelessWidget with GetItMixin {
   final Duration totalDuration;
   final Duration currentDuration;
   final Session session;
@@ -63,13 +64,13 @@ class TimerWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final _touchPosition = watchX((TimerManager tm) => tm.updateDragPosition);
     return GestureDetector(
-      // onTap: () => print('tapped!'),
       onLongPressStart: (details) {
-        print(details.localPosition);
+        get<TimerManager>().dragStarted(details.localPosition);
       },
       onLongPressMoveUpdate: (details) {
-        print(details.localOffsetFromOrigin);
+        get<TimerManager>().updateDragPosition(details.localOffsetFromOrigin);
       },
       child: CustomPaint(
         key: Key('painter'),
@@ -93,6 +94,7 @@ class TimerWidget extends StatelessWidget {
                   TotalTimeText(
                     totalMinutes: totalDuration.inMinutes,
                     session: session,
+                    touchPosition: _touchPosition,
                   ),
                 ],
               ),
@@ -128,20 +130,27 @@ class CounterText extends StatelessWidget {
 class TotalTimeText extends StatelessWidget {
   final int totalMinutes;
   final Session session;
+  final Offset touchPosition;
 
-  TotalTimeText({Key? key, required this.totalMinutes, required this.session}) : super(key: key);
+  TotalTimeText({Key? key, required this.totalMinutes, required this.session, this.touchPosition = Offset.zero})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final String s = totalMinutes > 1 ? 's' : '';
     final String text = '${totalMinutes.toString()} min$s';
 
-    return Text(
-      '$text',
-      style: TextStyle(
-        fontSize: 20,
-        color: (session.type == SessionType.pomodoro) ? kPrimaryColor.withOpacity(.85) : kAlternateColor,
-      ),
+    return Column(
+      children: [
+        Text(
+          '$text',
+          style: TextStyle(
+            fontSize: 20,
+            color: (session.type == SessionType.pomodoro) ? kPrimaryColor.withOpacity(.85) : kAlternateColor,
+          ),
+        ),
+        Text(touchPosition.toString()),
+      ],
     );
   }
 }

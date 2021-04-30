@@ -3,7 +3,9 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 
+import 'package:pomodoro_timer/tasks/_model/Session.dart';
 import 'package:pomodoro_timer/tasks/_model/pomodoro.dart';
+import 'package:pomodoro_timer/tasks/_model/sessions_utis.dart';
 
 class Task {
   String id;
@@ -12,17 +14,42 @@ class Task {
   final Duration shortBreak;
   final Duration longBreak;
   final int longBreakInterval;
+  final List<Session> sessions;
+  final int currentSession;
 
-  Task({
+  factory Task({
+    id = '',
+    title = 'No Title',
+    pomodoros = const <Pomodoro>[],
+    shortBreak = const Duration(minutes: 5),
+    longBreak = const Duration(minutes: 15),
+    longBreakInterval = 4,
+    sessions = const [],
+    currentSession = 0,
+  }) {
+    id = Uuid().v1();
+    return Task._(
+      id: id,
+      title: title,
+      pomodoros: pomodoros,
+      shortBreak: shortBreak,
+      longBreak: longBreak,
+      longBreakInterval: longBreakInterval,
+      sessions: generateSessions(pomodoros, shortBreak, longBreak, longBreakInterval),
+      currentSession: currentSession,
+    );
+  }
+
+  Task._({
     this.id = '',
     this.title = 'No Title',
-    this.pomodoros = const [],
+    this.pomodoros = const <Pomodoro>[],
     this.shortBreak = const Duration(minutes: 5),
     this.longBreak = const Duration(minutes: 15),
     this.longBreakInterval = 4,
-  }) {
-    id = Uuid().v1();
-  }
+    this.sessions = const [],
+    this.currentSession = 0,
+  });
 
   Task defaultTimer() {
     return Task(
@@ -40,6 +67,8 @@ class Task {
     Duration? shortBreak,
     Duration? longBreak,
     int? longBreakInterval,
+    List<Session>? sessions,
+    int? currentSession,
   }) {
     return Task(
       id: id ?? this.id,
@@ -48,6 +77,8 @@ class Task {
       shortBreak: shortBreak ?? this.shortBreak,
       longBreak: longBreak ?? this.longBreak,
       longBreakInterval: longBreakInterval ?? this.longBreakInterval,
+      sessions: sessions ?? this.sessions,
+      currentSession: currentSession ?? this.currentSession,
     );
   }
 
@@ -59,6 +90,8 @@ class Task {
       'shortBreak': shortBreak,
       'longBreak': longBreak,
       'longBreakInterval': longBreakInterval,
+      'sessions': sessions.map((x) => x.toMap()).toList(),
+      'currentSession': currentSession,
     };
   }
 
@@ -70,6 +103,8 @@ class Task {
       shortBreak: map['shortBreak'],
       longBreak: map['longBreak'],
       longBreakInterval: map['longBreakInterval'],
+      sessions: List<Session>.from(map['sessions']?.map((x) => Session.fromMap(x))),
+      currentSession: map['currentSession'],
     );
   }
 
@@ -79,7 +114,7 @@ class Task {
 
   @override
   String toString() {
-    return 'Task(id: $id, title: $title, pomodoros: $pomodoros, shortBreak: $shortBreak, longBreak: $longBreak, longBreakInterval: $longBreakInterval)';
+    return 'Task(id: $id, title: $title, pomodoros: $pomodoros, shortBreak: $shortBreak, longBreak: $longBreak, longBreakInterval: $longBreakInterval, sessions: $sessions, currentSession: $currentSession)';
   }
 
   @override
@@ -92,7 +127,9 @@ class Task {
         listEquals(other.pomodoros, pomodoros) &&
         other.shortBreak == shortBreak &&
         other.longBreak == longBreak &&
-        other.longBreakInterval == longBreakInterval;
+        other.longBreakInterval == longBreakInterval &&
+        listEquals(other.sessions, sessions) &&
+        other.currentSession == currentSession;
   }
 
   @override
@@ -102,6 +139,8 @@ class Task {
         pomodoros.hashCode ^
         shortBreak.hashCode ^
         longBreak.hashCode ^
-        longBreakInterval.hashCode;
+        longBreakInterval.hashCode ^
+        sessions.hashCode ^
+        currentSession.hashCode;
   }
 }

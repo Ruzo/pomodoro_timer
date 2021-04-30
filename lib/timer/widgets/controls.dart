@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get_it_mixin/get_it_mixin.dart';
 import 'package:pomodoro_timer/constants.dart';
-import 'package:pomodoro_timer/tasks/_services/tasks_service.dart';
+import 'package:pomodoro_timer/tasks/_manager/tasks_manager.dart';
 import 'package:pomodoro_timer/timer/_manager/timer_manager.dart';
 import 'package:pomodoro_timer/timer/_services/timer_service.dart';
 
@@ -11,7 +11,7 @@ class Controls extends StatelessWidget with GetItMixin {
   @override
   Widget build(BuildContext context) {
     final timerIsRunning = watchX((TimerService ts) => ts.timerIsRunning);
-    final taskIsDone = watchX((TasksService tsk) => tsk.taskIsDone);
+    final taskIsDone = watchX((TasksManager tm) => tm.taskIsDone);
     var tm = get<TimerManager>();
 
     return Center(
