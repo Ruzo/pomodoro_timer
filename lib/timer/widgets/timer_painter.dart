@@ -220,6 +220,8 @@ class TimerPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(TimerPainter oldDelegate) {
-    return (currentMs != oldDelegate.currentMs) || (dragStarted != oldDelegate.dragStarted);
+    return (currentMs != oldDelegate.currentMs) ||
+        (dragStarted != oldDelegate.dragStarted) ||
+        (dragPosition != oldDelegate.dragPosition);
   }
 }
