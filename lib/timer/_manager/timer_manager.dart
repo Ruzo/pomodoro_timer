@@ -14,7 +14,7 @@ class TimerManager {
   late Command<void, void> stopTimer;
   late Command<void, void> resetTimer;
   late Command<void, void> cancelTimer;
-  late Command<Offset, bool> dragStarted;
+  late Command<bool, bool> dragStarted;
   late Command<Offset, Offset> updateDragPosition;
 
   var tms = GetIt.I<TimerService>();
@@ -80,9 +80,9 @@ class TimerManager {
       },
     );
 
-    dragStarted = Command.createSync((position) {
-      print('longPressed started at: ${position.toString()}');
-      return true;
+    dragStarted = Command.createSync((b) {
+      print('dragStarted Command: $b');
+      return b;
     }, false);
 
     updateDragPosition = Command.createSync((position) {

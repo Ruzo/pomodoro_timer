@@ -7,6 +7,8 @@ class TimerPainter extends CustomPainter {
   final int totalMs;
   final int currentMs;
   final SessionType sessionType;
+  final Offset dragPosition;
+  final bool dragStarted;
   double progressSweepAngle = 0.0;
   double currentAngle = 0.0;
   Path _hitPath = Path();
@@ -15,6 +17,8 @@ class TimerPainter extends CustomPainter {
     required this.totalMs,
     required this.currentMs,
     required this.sessionType,
+    required this.dragPosition,
+    required this.dragStarted,
   }) {
     progressSweepAngle = ((kSweepAngle) / totalMs) * currentMs;
     currentAngle = currentMs / totalMs;
@@ -30,6 +34,7 @@ class TimerPainter extends CustomPainter {
     final double progressLineRadius = radius - 35;
     final double centerCircleRadius = radius - 40;
     final double thumbRadians = progressSweepAngle;
+    final double progressLineC = 2 * pi * progressLineRadius;
 
     // move 0 degree to top
     canvas.translate(centerX, centerY);
@@ -138,6 +143,12 @@ class TimerPainter extends CustomPainter {
       ..strokeWidth = 5
       ..maskFilter = MaskFilter.blur(BlurStyle.inner, 1);
 
+    final Paint draggingCircleBorderPaint = Paint()
+      ..color = progressColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2
+      ..maskFilter = MaskFilter.blur(BlurStyle.inner, 1);
+
     canvas.drawShadow(
       Path()
         ..addOval(
@@ -171,6 +182,17 @@ class TimerPainter extends CustomPainter {
       9,
       progressPosCircleBorderPaint,
     );
+    // print('dragStarted Painter: $dragStarted');
+    if (dragStarted) {
+      canvas.drawCircle(
+        Offset(
+          thumbCenterDx,
+          thumbCenterDy,
+        ),
+        20,
+        draggingCircleBorderPaint,
+      );
+    }
 
     _hitPath = Path()
       ..addOval(
@@ -182,19 +204,17 @@ class TimerPainter extends CustomPainter {
             ),
             radius: 20),
       );
-
-    // print(
-    //     'HitX: ${center.dx + (progressLineRadius) * sin(thumbRadians)} HitY: ${center.dy - (progressLineRadius) * cos(thumbRadians)}');
   }
 
   @override
   bool hitTest(Offset position) {
     bool _hit = _hitPath.contains(position);
+    // print(_hit);
     return _hit;
   }
 
   @override
   bool shouldRepaint(TimerPainter oldDelegate) {
-    return currentMs != oldDelegate.currentMs;
+    return (currentMs != oldDelegate.currentMs) || (dragStarted != oldDelegate.dragStarted);
   }
 }

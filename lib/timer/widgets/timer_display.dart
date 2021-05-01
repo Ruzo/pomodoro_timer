@@ -64,14 +64,10 @@ class TimerWidget extends StatelessWidget with GetItMixin {
 
   @override
   Widget build(BuildContext context) {
-    final _touchPosition = watchX((TimerManager tm) => tm.updateDragPosition);
+    final _dragStarted = watchX((TimerManager tm) => tm.dragStarted);
+    final _dragPosition = watchX((TimerManager tm) => tm.updateDragPosition);
+    //! dragStarted does not work with painter hitTest unless added to shoulRepaint
     return GestureDetector(
-      onLongPressStart: (details) {
-        get<TimerManager>().dragStarted(details.localPosition);
-      },
-      onLongPressMoveUpdate: (details) {
-        get<TimerManager>().updateDragPosition(details.localOffsetFromOrigin);
-      },
       child: CustomPaint(
         key: Key('painter'),
         isComplex: true,
@@ -79,8 +75,11 @@ class TimerWidget extends StatelessWidget with GetItMixin {
           totalMs: total,
           currentMs: current,
           sessionType: session.type,
+          dragPosition: _dragPosition,
+          dragStarted: _dragStarted,
         ),
         child: IgnorePointer(
+          ignoring: true,
           child: Container(
             decoration: BoxDecoration(
               shape: BoxShape.circle,
@@ -94,7 +93,7 @@ class TimerWidget extends StatelessWidget with GetItMixin {
                   TotalTimeText(
                     totalMinutes: totalDuration.inMinutes,
                     session: session,
-                    touchPosition: _touchPosition,
+                    touchPosition: _dragPosition,
                   ),
                 ],
               ),
@@ -102,6 +101,16 @@ class TimerWidget extends StatelessWidget with GetItMixin {
           ),
         ),
       ),
+      onPanStart: (details) {
+        print(details.localPosition);
+        get<TimerManager>().dragStarted(true);
+      },
+      onPanUpdate: (details) {
+        get<TimerManager>().updateDragPosition(details.localPosition);
+      },
+      onPanEnd: (details) {
+        get<TimerManager>().dragStarted(false);
+      },
     );
   }
 }
