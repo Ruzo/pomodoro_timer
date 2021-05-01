@@ -33,8 +33,7 @@ class TimerPainter extends CustomPainter {
     final double timerBkgRadius = radius - 20;
     final double progressLineRadius = radius - 35;
     final double centerCircleRadius = radius - 40;
-    final double thumbRadians = progressSweepAngle;
-    final double progressLineC = 2 * pi * progressLineRadius;
+    double thumbRadians = progressSweepAngle;
 
     // move 0 degree to top
     canvas.translate(centerX, centerY);
@@ -130,8 +129,14 @@ class TimerPainter extends CustomPainter {
     );
 
     //# Thumb @ Progress Indicator line pos
-    final double thumbCenterDx = center.dx + (progressLineRadius) * cos(thumbRadians);
-    final double thumbCenterDy = center.dy + (progressLineRadius) * sin(thumbRadians);
+    if (dragStarted && dragPosition.distance > 0.0) {
+      final double deltaX = (300 - dragPosition.dy) - center.dx;
+      final double deltaY = dragPosition.dx - center.dy;
+      thumbRadians = atan2(deltaY, deltaX);
+      // print('dragStarted calc: deltaX: $deltaX, deltaY: $deltaY, rdX: $thumbRadians, rdY: $thumbRadians');
+    }
+    final double thumbCenterDx = center.dx + (progressLineRadius * cos(thumbRadians));
+    final double thumbCenterDy = center.dy + (progressLineRadius * sin(thumbRadians));
     // print('ThumbX: $thumbCenterDx, ThumbY: $thumbCenterDy');
     final Paint progressPosCirclePaint = Paint()
       ..color = Colors.white

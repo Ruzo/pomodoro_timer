@@ -93,7 +93,6 @@ class TimerWidget extends StatelessWidget with GetItMixin {
                   TotalTimeText(
                     totalMinutes: totalDuration.inMinutes,
                     session: session,
-                    touchPosition: _dragPosition,
                   ),
                 ],
               ),
@@ -139,27 +138,20 @@ class CounterText extends StatelessWidget {
 class TotalTimeText extends StatelessWidget {
   final int totalMinutes;
   final Session session;
-  final Offset touchPosition;
 
-  TotalTimeText({Key? key, required this.totalMinutes, required this.session, this.touchPosition = Offset.zero})
-      : super(key: key);
+  TotalTimeText({Key? key, required this.totalMinutes, required this.session}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final String s = totalMinutes > 1 ? 's' : '';
     final String text = '${totalMinutes.toString()} min$s';
 
-    return Column(
-      children: [
-        Text(
-          '$text',
-          style: TextStyle(
-            fontSize: 20,
-            color: (session.type == SessionType.pomodoro) ? kPrimaryColor.withOpacity(.85) : kAlternateColor,
-          ),
-        ),
-        Text(touchPosition.toString()),
-      ],
+    return Text(
+      '$text',
+      style: TextStyle(
+        fontSize: 20,
+        color: (session.type == SessionType.pomodoro) ? kPrimaryColor.withOpacity(.85) : kAlternateColor,
+      ),
     );
   }
 }

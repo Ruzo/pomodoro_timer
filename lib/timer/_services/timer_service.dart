@@ -5,7 +5,7 @@ import 'package:pomodoro_timer/tasks/_services/tasks_service.dart';
 
 class TimerService {
   Ticker _ticker = Ticker((_) {});
-  DateTime _stopTime = DateTime.now();
+  DateTime _pauseTime = DateTime.now();
   DateTime _timeAtZero = DateTime.now();
   bool _paused = false;
   Duration _timeOffset = Duration.zero;
@@ -50,16 +50,16 @@ class TimerService {
 
   void start() {
     if (!_paused) _timeAtZero = DateTime.now();
-    _timeOffset += _paused ? DateTime.now().difference(_stopTime) : Duration.zero;
+    _timeOffset += _paused ? DateTime.now().difference(_pauseTime) : Duration.zero;
     _ticker.start();
     _timerIsRunning.value = _ticker.isActive;
   }
 
   void pause() {
     _ticker.stop();
-    _stopTime = DateTime.now();
+    _pauseTime = DateTime.now();
     _paused = true;
-    print(_stopTime);
+    print(_pauseTime);
     _timerIsRunning.value = _ticker.isActive;
   }
 

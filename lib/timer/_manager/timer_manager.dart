@@ -81,7 +81,7 @@ class TimerManager {
     );
 
     dragStarted = Command.createSync((b) {
-      print('dragStarted Command: $b');
+      // print('dragStarted Command: $b');
       return b;
     }, false);
 
