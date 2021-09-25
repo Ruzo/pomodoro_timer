@@ -15,5 +15,3 @@ const double kStartAngle = 0.0;
 const double kSweepAngle = 2 * pi;
 
 const Duration kDefaultTotalTime = Duration(minutes: 1);
-
-enum SessionType { pomodoro, short_break, long_break }

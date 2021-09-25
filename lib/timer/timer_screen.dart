@@ -1,20 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:get_it_mixin/get_it_mixin.dart';
-import 'package:pomodoro_timer/tasks/_manager/tasks_manager.dart';
-import 'package:pomodoro_timer/tasks/_model/Session.dart';
-import 'package:pomodoro_timer/tasks/_services/tasks_service.dart';
 import 'package:pomodoro_timer/timer/widgets/controls.dart';
 import 'package:pomodoro_timer/timer/widgets/current_task.dart';
 import 'package:pomodoro_timer/timer/widgets/pomodoro_indicator.dart';
 import 'package:pomodoro_timer/timer/widgets/timer_display.dart';
 
 class TimerScreen extends StatelessWidget with GetItMixin {
+  TimerScreen({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    var ts = get<TasksService>();
-    final isInitializing = watchX((TasksManager tm) => tm.initData.isExecuting);
-    List<Session> _sessions = ts.sessions;
-    final _currentSession = watchX((TasksService s) => s.currentSessionIndex);
+    // final isInitializing = watchX((TasksManager tm) => tm.initData.isExecuting);
 
     return SafeArea(
       child: Scaffold(
@@ -22,7 +19,7 @@ class TimerScreen extends StatelessWidget with GetItMixin {
         appBar: AppBar(
           elevation: 0.0,
           backgroundColor: Theme.of(context).backgroundColor,
-          title: Center(
+          title: const Center(
             child: Text(
               'Pomodoro timer',
               style: TextStyle(
@@ -36,29 +33,25 @@ class TimerScreen extends StatelessWidget with GetItMixin {
           child: Center(
             child: Padding(
               padding: const EdgeInsets.all(20.0),
-              child: isInitializing
-                  ? CircularProgressIndicator()
-                  : Container(
-                      child: Column(
+              child: FutureBuilder(
+                  future: GetIt.I.allReady(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      return Column(
                         children: [
-                          CurrentTask(
-                            title: 'Work on Pomodoro timer',
-                          ),
-                          Padding(padding: const EdgeInsets.all(30.0)),
-                          TimerDisplay(
-                            totalTime: _sessions[_currentSession].duration,
-                            session: _sessions[_currentSession],
-                          ),
-                          Padding(padding: const EdgeInsets.all(20.0)),
-                          PomodoroIndicator(
-                            sessions: _sessions,
-                            currentSession: _currentSession,
-                          ),
-                          Padding(padding: const EdgeInsets.all(30.0)),
+                          CurrentTask(),
+                          const Padding(padding: EdgeInsets.all(30.0)),
+                          TimerDisplay(),
+                          const Padding(padding: EdgeInsets.all(20.0)),
+                          PomodoroIndicator(),
+                          const Padding(padding: EdgeInsets.all(30.0)),
                           Controls(),
                         ],
-                      ),
-                    ),
+                      );
+                    } else {
+                      return const CircularProgressIndicator.adaptive();
+                    }
+                  }),
             ),
           ),
         ),

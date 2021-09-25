@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 // import 'package:google_fonts/google_fonts.dart';
 import 'package:pomodoro_timer/constants.dart';
 
-class AppTheme {
-  static ThemeData darkTheme = ThemeData.dark().copyWith(
-    backgroundColor: kBackgroundColor,
-    primaryColor: kPrimaryColor,
-    accentColor: kAccentColor,
-    textTheme: ThemeData.dark().textTheme.apply(fontFamily: 'AvenirNext'),
-  );
-}
+/// Theme for colors and font
+ThemeData darkTheme = ThemeData.dark().copyWith(
+  backgroundColor: kBackgroundColor,
+  primaryColor: kPrimaryColor,
+  colorScheme: ColorScheme.fromSwatch().copyWith(secondary: kAccentColor),
+  textTheme: ThemeData.dark().textTheme.apply(fontFamily: 'AvenirNext'),
+);

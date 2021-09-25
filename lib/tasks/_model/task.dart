@@ -3,12 +3,13 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 
-import 'package:pomodoro_timer/tasks/_model/Session.dart';
+import 'package:pomodoro_timer/tasks/_model/session.dart';
 import 'package:pomodoro_timer/tasks/_model/pomodoro.dart';
 import 'package:pomodoro_timer/tasks/_model/sessions_utis.dart';
 
+@immutable
 class Task {
-  String id;
+  final String id;
   final String title;
   final List<Pomodoro> pomodoros;
   final Duration shortBreak;
@@ -27,7 +28,7 @@ class Task {
     sessions = const [],
     currentSession = 0,
   }) {
-    id = Uuid().v1();
+    id = const Uuid().v1();
     return Task._(
       id: id,
       title: title,
@@ -40,7 +41,7 @@ class Task {
     );
   }
 
-  Task._({
+  const Task._({
     this.id = '',
     this.title = 'No Title',
     this.pomodoros = const <Pomodoro>[],

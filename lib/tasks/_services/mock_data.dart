@@ -10,7 +10,7 @@ class MockData {
           Task(
             title: 'Default Pomodoro timer',
             pomodoros: const [
-              Pomodoro(),
+              Pomodoro(duration: Duration(minutes: 25)),
               Pomodoro(),
               // Pomodoro(),
               // Pomodoro(),

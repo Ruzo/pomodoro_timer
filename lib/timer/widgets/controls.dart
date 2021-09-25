@@ -8,6 +8,8 @@ import 'package:pomodoro_timer/timer/_manager/timer_manager.dart';
 import 'package:pomodoro_timer/timer/_services/timer_service.dart';
 
 class Controls extends StatelessWidget with GetItMixin {
+  Controls({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     final timerIsRunning = watchX((TimerService ts) => ts.timerIsRunning);
@@ -22,7 +24,7 @@ class Controls extends StatelessWidget with GetItMixin {
           height: 70,
           decoration: ShapeDecoration(
             color: taskIsDone ? kBackgroundLiteColor : kPrimaryColor,
-            shape: CircleBorder(),
+            shape: const CircleBorder(),
             shadows: [
               BoxShadow(
                 color: kPrimaryColor.withOpacity(.7),
@@ -36,11 +38,11 @@ class Controls extends StatelessWidget with GetItMixin {
             iconSize: 35,
             mouseCursor: taskIsDone ? SystemMouseCursors.forbidden : SystemMouseCursors.click,
             icon: timerIsRunning
-                ? ImageIcon(
+                ? const ImageIcon(
                     AssetImage('icons/icons8-pause-100-white-blured.png'),
                   )
-                : Padding(
-                    padding: const EdgeInsets.only(left: 4),
+                : const Padding(
+                    padding: EdgeInsets.only(left: 4),
                     child: ImageIcon(
                       AssetImage('icons/icons8-play-100-white-blured.png'),
                     ),

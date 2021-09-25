@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:get_it_mixin/get_it_mixin.dart';
+import 'package:pomodoro_timer/tasks/_manager/tasks_manager.dart';
 
-class CurrentTask extends StatelessWidget {
-  final String title;
-
-  const CurrentTask({Key? key, required this.title}) : super(key: key);
+class CurrentTask extends StatelessWidget with GetItMixin {
+  CurrentTask({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final _currentTask = watchX((TasksManager tm) => tm.getCurrentTask);
+
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(30.0),
-        color: Theme.of(context).accentColor,
+        color: Theme.of(context).colorScheme.secondary,
       ),
       width: double.infinity,
       child: Padding(
@@ -20,7 +22,7 @@ class CurrentTask extends StatelessWidget {
           children: [
             Flexible(
               child: Text(
-                'Task: $title',
+                'Task: ${_currentTask.title}',
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: Colors.white.withOpacity(.85),
@@ -29,7 +31,7 @@ class CurrentTask extends StatelessWidget {
                 ),
               ),
             ),
-            Icon(Icons.edit_outlined),
+            const Icon(Icons.edit_outlined),
           ],
         ),
       ),

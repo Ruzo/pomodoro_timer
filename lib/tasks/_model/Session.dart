@@ -1,12 +1,15 @@
 import 'dart:convert';
 
-import 'package:pomodoro_timer/constants.dart';
+import 'package:flutter/foundation.dart';
 
+enum SessionType { pomodoro, shortBreak, longBreak }
+
+@immutable
 class Session {
   final Duration duration;
   final SessionType type;
-  bool done;
-  Session({
+  final bool done;
+  const Session({
     required this.duration,
     required this.type,
     this.done = false,
@@ -25,7 +28,7 @@ class Session {
   }
 
   factory Session.pomodoro() {
-    return Session(
+    return const Session(
       duration: Duration(minutes: 25),
       type: SessionType.pomodoro,
     );

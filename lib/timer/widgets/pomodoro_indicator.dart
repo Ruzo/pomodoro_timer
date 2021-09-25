@@ -1,27 +1,22 @@
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:get_it_mixin/get_it_mixin.dart';
 import 'package:pomodoro_timer/constants.dart';
-import 'package:pomodoro_timer/tasks/_model/Session.dart';
+import 'package:pomodoro_timer/tasks/_model/session.dart';
+import 'package:pomodoro_timer/tasks/_services/tasks_service.dart';
 import 'package:pomodoro_timer/timer/_services/timer_service.dart';
 
-class PomodoroIndicator extends StatelessWidget {
-  final List<Session> sessions;
-  final int currentSession;
-  // final bool taskIsDone;
-
-  PomodoroIndicator({
-    Key? key,
-    required this.sessions,
-    required this.currentSession,
-    // required this.taskIsDone,
-  }) : super(key: key);
+/// Widget for progress indicator showing current session within the task.
+class PomodoroIndicator extends StatelessWidget with GetItMixin {
+  PomodoroIndicator({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    var _sessions = GetIt.I<TasksService>().sessions;
+    final _currentSession = watchX((TasksService s) => s.currentSessionIndex);
     return Center(
-      child: Container(
+      child: SizedBox(
         height: 20,
         child: ImageFiltered(
           imageFilter: ImageFilter.blur(sigmaX: 0.5, sigmaY: 0.5),
@@ -31,8 +26,8 @@ class PomodoroIndicator extends StatelessWidget {
             children: <Widget>[
               IndicatorItemsList(
                 context: context,
-                sessions: sessions,
-                currentSession: currentSession,
+                sessions: _sessions,
+                currentSession: _currentSession,
               ),
             ],
           ),
@@ -62,8 +57,8 @@ class IndicatorItemsList extends StatelessWidget {
       children: List<Widget>.generate(
         sessions.length,
         (index) {
-          final Session session = sessions[index];
-          final bool isCurrent = currentSession == index;
+          var session = sessions[index];
+          var isCurrent = currentSession == index;
 
           switch (session.type) {
             case SessionType.pomodoro:
@@ -83,14 +78,14 @@ class IndicatorItemsList extends StatelessWidget {
                 width: (isCurrent && !session.done) ? 20 : 12,
                 height: (isCurrent && !session.done) ? 20 : 12,
               );
-            case SessionType.short_break:
+            case SessionType.shortBreak:
               return BreakLineWidget(
                 context: context,
                 session: session,
                 width: 20.0,
                 isCurrent: isCurrent,
               );
-            case SessionType.long_break:
+            case SessionType.longBreak:
               return BreakLineWidget(
                 context: context,
                 session: session,

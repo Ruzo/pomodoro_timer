@@ -1,39 +1,41 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_command/flutter_command.dart';
 import 'package:get_it/get_it.dart';
 import 'package:pomodoro_timer/tasks/_manager/tasks_manager.dart';
 import 'package:pomodoro_timer/tasks/_services/tasks_service.dart';
+import 'package:pomodoro_timer/timer/_models/dragging_data.dart';
 import 'package:pomodoro_timer/timer/_services/timer_service.dart';
+import 'package:pomodoro_timer/timer/widgets/timer_painter.dart';
+
+enum LimitReached { start, end, none }
 
 class TimerManager {
   late Command<void, bool> initTimer;
   late Command<void, Duration> getCurrentTime;
-  late Command<Duration, void> setCurrentTime;
-  late Command<void, void> startAtCurrentTime;
+  late Command<DraggingData, void> setTimeFromDrag;
   late Command<void, void> startTimer;
   late Command<void, void> stopTimer;
   late Command<void, void> resetTimer;
   late Command<void, void> cancelTimer;
   late Command<bool, bool> dragStarted;
   late Command<Offset, Offset> updateDragPosition;
+  late Command<bool, bool> dragging;
+  late Command<LimitReached, LimitReached> taskLimitsReached;
 
-  var tms = GetIt.I<TimerService>();
-  var tks = GetIt.I<TasksService>();
-  var tkm = GetIt.I<TasksManager>();
+  TimerService tms = GetIt.I<TimerService>();
+  TasksService tks = GetIt.I<TasksService>();
+  TasksManager tkm = GetIt.I<TasksManager>();
+  // bool _timerStartReached = false;
+  // bool _timerEndReached = false;
 
   TimerManager() {
-    // restart or cancel timer when session total time is reached
     tms.currentTime.listen((currentTime, _) {
-      if (currentTime >= tks.currentSession.duration) {
-        tkm.sessionEnded();
-        if (tkm.taskIsDone.value)
-          cancelTimer();
-        else
-          resetTimer();
+      if ((currentTime >= tks.currentSession.duration) && !dragging.value) {
+        nextSession();
       }
     });
 
-    // Start periodic timer to update currentTime with Stopwatch elapsed time.
     initTimer = Command.createSyncNoParam<bool>(
       tms.init,
       false,
@@ -68,27 +70,97 @@ class TimerManager {
       Duration.zero,
     );
 
-    setCurrentTime = Command.createSyncNoResult(
-      (time) {
-        tms.setCurrentTime(time);
+    setTimeFromDrag = Command.createSyncNoResult(
+      (DraggingData draggingData) {
+        if (draggingData.momentum == null) {
+          print('Momentum is null. Returning from setTimeFromDrag');
+          return;
+        }
+        var _timeToBeSet = draggingData.currentTimeInMs;
+        var totalTimeinMs = tks.currentSession.duration.inMilliseconds;
+
+        if (draggingData.momentum == Momentum.forwardZeroCrossed) {
+          if (taskLimitsReached.value == LimitReached.end) return;
+
+          if (tks.lastSession || tkm.taskIsDone.value) {
+            // _timerEndReached = true;
+            _timeToBeSet = totalTimeinMs;
+
+            tms.setSessionChangeFlag(status: SessionChange.end);
+            tms.setTimeFromMilliseconds(_timeToBeSet);
+
+            taskLimitsReached(LimitReached.end);
+          } else {
+            // _timerEndReached = false;
+            taskLimitsReached(LimitReached.none);
+
+            tms.setSessionChangeFlag(status: SessionChange.forward);
+            _timeToBeSet = draggingData.currentTimeInMs;
+          }
+
+          return;
+        }
+
+        if (draggingData.momentum == Momentum.reverseZeroCrossed) {
+          if (taskLimitsReached.value == LimitReached.start) return;
+          print('Backwards: Current session: ${tks.currentSessionIndex.value}');
+
+          if (tks.currentSessionIndex.value == 0) {
+            print('Absolute zero. draggingData.currentTimeInMs: ${draggingData.currentTimeInMs}');
+
+            // _timerStartReached = true;
+            tms.setSessionChangeFlag(status: SessionChange.beginning);
+            taskLimitsReached(LimitReached.start);
+            _timeToBeSet = 0;
+          } else {
+            // _timerStartReached = false;
+            taskLimitsReached(LimitReached.none);
+            tms.setTimeFromMilliseconds(_timeToBeSet);
+            tms.setSessionChangeFlag(status: SessionChange.backward);
+            // _timeToBeSet = tks.currentSession.duration.inMilliseconds - 1000;
+          }
+        }
+
+        if (draggingData.momentum == Momentum.forward || draggingData.momentum == Momentum.inReverse) {
+          taskLimitsReached(LimitReached.none);
+        }
+
+        if (taskLimitsReached.value == LimitReached.none) tms.setTimeFromMilliseconds(_timeToBeSet);
+        tms.changingSession = false;
       },
     );
 
-    startAtCurrentTime = Command.createSyncNoParamNoResult(
-      () {
-        tms.startAtCurrentTime();
-      },
-    );
+    dragStarted = Command.createSync((dragStart) {
+      tms.setDragStartedState(dragStarted: dragStart);
+      if (!dragStart) {
+        dragging(false);
+      }
 
-    dragStarted = Command.createSync((b) {
-      // print('dragStarted Command: $b');
-      return b;
+      return dragStart;
     }, false);
 
     updateDragPosition = Command.createSync((position) {
+      dragging(true);
       return position;
     }, Offset.zero);
 
+    dragging = Command.createSync((status) => status, false);
+
+    taskLimitsReached = Command.createSync((status) {
+      print('taskLimitsReached: $status');
+      return status;
+    }, LimitReached.none);
+
     initTimer();
+  }
+
+  void nextSession() {
+    tkm.sessionEnded();
+
+    if (tkm.taskIsDone.value) {
+      cancelTimer();
+    } else {
+      resetTimer();
+    }
   }
 }

@@ -1,7 +1,9 @@
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:pomodoro_timer/constants.dart';
 
+@immutable
 class Pomodoro {
   final Duration duration;
 
