@@ -6,7 +6,7 @@ import 'package:pomodoro_timer/tasks/_manager/tasks_manager.dart';
 import 'package:pomodoro_timer/tasks/_services/tasks_service.dart';
 import 'package:pomodoro_timer/timer/_models/dragging_data.dart';
 import 'package:pomodoro_timer/timer/_services/timer_service.dart';
-import 'package:pomodoro_timer/timer/widgets/timer_painter.dart';
+import 'package:pomodoro_timer/timer/ui/timer_painter.dart';
 
 enum LimitReached { start, end, none }
 
@@ -72,14 +72,14 @@ class TimerManager {
 
     setTimeFromDrag = Command.createSyncNoResult(
       (DraggingData draggingData) {
-        if (draggingData.momentum == null) {
-          print('Momentum is null. Returning from setTimeFromDrag');
+        if (draggingData.direction == null) {
+          print('Direction is null. Returning from setTimeFromDrag');
           return;
         }
         var _timeToBeSet = draggingData.currentTimeInMs;
         var totalTimeinMs = tks.currentSession.duration.inMilliseconds;
 
-        if (draggingData.momentum == Momentum.forwardZeroCrossed) {
+        if (draggingData.direction == Direction.forwardZeroCrossed) {
           if (taskLimitsReached.value == LimitReached.end) return;
 
           if (tks.lastSession || tkm.taskIsDone.value) {
@@ -101,7 +101,7 @@ class TimerManager {
           return;
         }
 
-        if (draggingData.momentum == Momentum.reverseZeroCrossed) {
+        if (draggingData.direction == Direction.reverseZeroCrossed) {
           if (taskLimitsReached.value == LimitReached.start) return;
           print('Backwards: Current session: ${tks.currentSessionIndex.value}');
 
@@ -121,7 +121,7 @@ class TimerManager {
           }
         }
 
-        if (draggingData.momentum == Momentum.forward || draggingData.momentum == Momentum.inReverse) {
+        if (draggingData.direction == Direction.forward || draggingData.direction == Direction.inReverse) {
           taskLimitsReached(LimitReached.none);
         }
 

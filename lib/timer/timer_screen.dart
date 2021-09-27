@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:get_it_mixin/get_it_mixin.dart';
-import 'package:pomodoro_timer/timer/widgets/controls.dart';
-import 'package:pomodoro_timer/timer/widgets/current_task.dart';
-import 'package:pomodoro_timer/timer/widgets/pomodoro_indicator.dart';
-import 'package:pomodoro_timer/timer/widgets/timer_display.dart';
+import 'package:pomodoro_timer/timer/ui/controls.dart';
+import 'package:pomodoro_timer/timer/ui/current_task.dart';
+import 'package:pomodoro_timer/timer/ui/pomodoro_indicator.dart';
+import 'package:pomodoro_timer/timer/ui/timer_display.dart';
 
 class TimerScreen extends StatelessWidget with GetItMixin {
   TimerScreen({Key? key}) : super(key: key);

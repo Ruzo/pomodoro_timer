@@ -1,14 +1,13 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:get_it_mixin/get_it_mixin.dart';
-import 'package:pomodoro_timer/constants.dart';
-import 'package:pomodoro_timer/tasks/_model/session.dart';
 import 'package:pomodoro_timer/tasks/_services/tasks_service.dart';
 import 'package:pomodoro_timer/timer/_manager/timer_manager.dart';
 import 'package:pomodoro_timer/timer/_services/timer_service.dart';
-import 'package:pomodoro_timer/timer/widgets/timer_painter.dart';
+import 'package:pomodoro_timer/timer/ui/timer_painter.dart';
+import 'package:pomodoro_timer/timer/ui/total_time_text.dart';
+
+import 'counter_text.dart';
 
 /// Widget box enclosing timer CustomPaint widget
 class TimerDisplay extends StatelessWidget with GetItMixin {
@@ -47,8 +46,8 @@ class TimerWidget extends StatelessWidget with GetItMixin {
     // final _taskLimitsReached = watchX((TimerManager tm) => tm.taskLimitsReached);
     var timeChars = _currentTime.toString().split('.').first.split(':').sublist(1);
 
-    //! dragStarted does not work with painter hitTest unless
-    //! added to shoulRepaint.
+    //WARNING: dragStarted does not work with painter hitTest unless
+    //WARNING: added to shoulRepaint.
     return GestureDetector(
       child: CustomPaint(
         key: const Key('painter'),
@@ -93,63 +92,6 @@ class TimerWidget extends StatelessWidget with GetItMixin {
       onPanEnd: (details) {
         get<TimerManager>().dragStarted(false);
       },
-    );
-  }
-}
-
-/// Text Widget for display of timer counter
-class CounterText extends StatelessWidget {
-  /// Counter as text
-  final String text;
-
-  /// Instance of Text Widget for display of timer counter
-  const CounterText({Key? key, required this.text}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      textAlign: TextAlign.center,
-      style: TextStyle(
-        color: Colors.white.withOpacity(.85),
-        fontSize: 45,
-        fontFeatures: const [
-          FontFeature.tabularFigures(),
-        ],
-      ),
-    );
-  }
-}
-
-/// Text widget of total session time
-class TotalTimeText extends StatelessWidget {
-  /// Total session time to be displayed
-  final int totalMinutes;
-
-  /// Current timer session
-  final Session session;
-
-  /// Instance of Text created from total session time int
-  /// and colored depending on type.
-  const TotalTimeText({
-    Key? key,
-    required this.totalMinutes,
-    required this.session,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    var s = totalMinutes > 1 ? 's' : '';
-    var text = '${totalMinutes.toString()} min$s';
-
-    return Text(
-      text,
-      style: TextStyle(
-        fontSize: 20,
-        color: (session.type == SessionType.pomodoro) //
-            ? kPrimaryColor.withOpacity(.85)
-            : kAlternateColor,
-      ),
     );
   }
 }
