@@ -8,6 +8,14 @@
       "name": "pomodoro_timer",
       "request": "launch",
       "type": "dart"
+    },
+    {
+      "name": "launch_with_detective",
+      "request": "launch",
+      "type": "dart",
+      "args": [
+        "--vmservice-out-file=detective_connect.txt"
+      ]
     }
   ]
 }

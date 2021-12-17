@@ -28,7 +28,7 @@ class TasksService {
   List<Task> get taskList => _tasksList;
 
   Future<Task> init() async {
-    print('Init Task');
+    print('Init Task Service');
     var clientData = await data;
     _tasksList = clientData.tasksList;
     var _selectedTask = await taskById(clientData.selectedTaskID);
@@ -50,7 +50,7 @@ class TasksService {
         ),
         () {
           print('getting taskById');
-          if (id == null) throw 'Task not found!';
+          assert(id != null);
           var _task = (id == '')
               ? defaultTask
               : _data.tasksList.firstWhere(

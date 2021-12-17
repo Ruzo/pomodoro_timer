@@ -46,8 +46,7 @@ class TimerWidget extends StatelessWidget with GetItMixin {
     // final _taskLimitsReached = watchX((TimerManager tm) => tm.taskLimitsReached);
     var timeChars = _currentTime.toString().split('.').first.split(':').sublist(1);
 
-    //WARNING: dragStarted does not work with painter hitTest unless
-    //WARNING: added to shoulRepaint.
+    // dragStarted does not work with painter hitTest unless added to shoulRepaint!
     return GestureDetector(
       child: CustomPaint(
         key: const Key('painter'),

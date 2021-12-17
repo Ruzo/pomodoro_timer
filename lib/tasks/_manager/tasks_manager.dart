@@ -20,7 +20,7 @@ class TasksManager extends ChangeNotifier {
 
     initData = Command.createAsyncNoParam(() async {
       if (dataIsInitialized.value) return true;
-      print('Init Task');
+      print('Init Task Manager');
 
       ts.selectedTask = await ts.init();
 

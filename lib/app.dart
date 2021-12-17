@@ -12,7 +12,7 @@ class PomodoroTimerApp extends StatelessWidget {
       theme: darkTheme,
       home: LayoutBuilder(
         builder: (context, constraints) {
-          return TimerScreen();
+          return const TimerScreen();
         },
       ),
     );

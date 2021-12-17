@@ -96,7 +96,7 @@ class TimerPainter extends CustomPainter {
     // Center circle with glow shadow
     paintCenterCircleWithGlowShadow(_progressColor, canvas, _center, _centerCircleRadius);
 
-    //XXX Thumb @ Progress Indicator line pos
+    //XXX Thumb @ Progress Indicator line pos XXX
     if (dragging) {
       var _deltaX = (300 - dragPosition.dy) - _center.dx;
       var _deltaY = dragPosition.dx - _center.dy;
@@ -134,8 +134,7 @@ class TimerPainter extends CustomPainter {
     _hitPath = Path()
       ..addOval(
         Rect.fromCircle(
-            //WARNING: hitTest path Offset does not take canvas translate and rotation
-            //WARNING: into account
+            // hitTest path Offset does not take canvas translate and rotation into account!
             center: Offset(
               _center.dx + (_progressLineRadius) * sin(_thumbRadians),
               _center.dy - (_progressLineRadius) * cos(_thumbRadians),
@@ -158,6 +157,7 @@ class TimerPainter extends CustomPainter {
         (dragPosition != oldDelegate.dragPosition);
   }
 
+  // Calculate dragging direction and position of thumb relative to 0.00
   // BUG: fix prevValue and currentValue issue after zeroCrossed
   Direction? checkDirection(double prevValue, double currentValue) {
     print('prevValue: $prevValue, currentValue: $currentValue, changingSession: ${ts.changingSession}');
@@ -173,13 +173,9 @@ class TimerPainter extends CustomPainter {
     }
   }
 
-  double convertToFullCircle(double radians) {
-    return radians < 0 //
-        ? (2 * pi) + radians
-        : radians;
-  }
+  double convertToFullCircle(double radians) => //
+      radians < 0 ? (2 * pi) + radians : radians;
 
-  double convertToHalfCircle(double radians) {
-    return radians > pi ? (pi - radians) : radians;
-  }
+  double convertToHalfCircle(double radians) => //
+      radians > pi ? (pi - radians) : radians;
 }
