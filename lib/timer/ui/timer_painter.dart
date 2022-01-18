@@ -9,8 +9,6 @@ import 'package:pomodoro_timer/timer/_models/dragging_data.dart';
 import 'package:pomodoro_timer/timer/_services/timer_service.dart';
 import 'package:pomodoro_timer/timer/ui/paint_objects.dart';
 
-enum Direction { forward, inReverse, forwardZeroCrossed, reverseZeroCrossed }
-
 /// Main painter for timer which rebuilds every tick through currentMs
 /// while running.
 class TimerPainter extends CustomPainter {
@@ -105,7 +103,7 @@ class TimerPainter extends CustomPainter {
       print('totalMs: $totalMs, currentMs: $currentMs, limitsReached: $limitsReached');
 
       var _timeRadians = convertToFullCircle(_dragRadians);
-      var _direction = checkDirection(_prevRadians, _timeRadians);
+      var _direction = tm.checkDirection(_prevRadians, _timeRadians);
       print('direction: $_direction');
 
       if (_direction == null) return;
@@ -155,22 +153,6 @@ class TimerPainter extends CustomPainter {
     return (currentMs != oldDelegate.currentMs) ||
         (dragStarted != oldDelegate.dragStarted) ||
         (dragPosition != oldDelegate.dragPosition);
-  }
-
-  // Calculate dragging direction and position of thumb relative to 0.00
-  // BUG: fix prevValue and currentValue issue after zeroCrossed
-  Direction? checkDirection(double prevValue, double currentValue) {
-    print('prevValue: $prevValue, currentValue: $currentValue, changingSession: ${ts.changingSession}');
-    if (!ts.changingSession) {
-      if (prevValue >= 6.0 && currentValue <= 1.0) return Direction.forwardZeroCrossed;
-      if (prevValue <= 1.0 && currentValue >= 6.0) return Direction.reverseZeroCrossed;
-    }
-
-    if ((prevValue < currentValue) && (limitsReached != LimitReached.start)) {
-      return Direction.forward;
-    } else if ((prevValue > currentValue) && (limitsReached != LimitReached.end)) {
-      return Direction.inReverse;
-    }
   }
 
   double convertToFullCircle(double radians) => //

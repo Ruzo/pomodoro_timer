@@ -15,3 +15,7 @@ const double kStartAngle = 0.0;
 const double kSweepAngle = 2 * pi;
 
 const Duration kDefaultTotalTime = Duration(minutes: 1);
+
+// enums
+enum Direction { forward, inReverse, forwardZeroCrossed, reverseZeroCrossed }
+enum LimitReached { start, end, none }

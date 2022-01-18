@@ -12,6 +12,7 @@ class TimerScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        extendBody: true,
         backgroundColor: Theme.of(context).backgroundColor,
         appBar: AppBar(
           elevation: 0.0,

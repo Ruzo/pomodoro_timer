@@ -1,4 +1,4 @@
-import 'package:pomodoro_timer/timer/ui/timer_painter.dart';
+import 'package:pomodoro_timer/constants.dart';
 
 /// Data from dragging timer thumb that includes conversion of coords to time in
 /// milliseconds and Direction value.

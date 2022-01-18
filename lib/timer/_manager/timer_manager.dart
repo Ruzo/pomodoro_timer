@@ -2,13 +2,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_command/flutter_command.dart';
 import 'package:get_it/get_it.dart';
+import 'package:pomodoro_timer/constants.dart';
 import 'package:pomodoro_timer/tasks/_manager/tasks_manager.dart';
 import 'package:pomodoro_timer/tasks/_services/tasks_service.dart';
 import 'package:pomodoro_timer/timer/_models/dragging_data.dart';
 import 'package:pomodoro_timer/timer/_services/timer_service.dart';
-import 'package:pomodoro_timer/timer/ui/timer_painter.dart';
-
-enum LimitReached { start, end, none }
 
 class TimerManager {
   late Command<void, bool> initTimer;
@@ -34,6 +32,7 @@ class TimerManager {
       if ((currentTime >= tks.currentSession.duration) && !dragging.value) {
         nextSession();
       }
+      getCurrentTime();
     });
 
     initTimer = Command.createSyncNoParam<bool>(
@@ -161,6 +160,22 @@ class TimerManager {
       cancelTimer();
     } else {
       resetTimer();
+    }
+  }
+
+  // Calculate dragging direction and position of thumb relative to 0.00
+  // BUG: fix prevValue and currentValue issue after zeroCrossed
+  Direction? checkDirection(double prevValue, double currentValue) {
+    print('prevValue: $prevValue, currentValue: $currentValue, changingSession: ${tms.changingSession}');
+    if (!tms.changingSession) {
+      if (prevValue >= 6.0 && currentValue <= 1.0) return Direction.forwardZeroCrossed;
+      if (prevValue <= 1.0 && currentValue >= 6.0) return Direction.reverseZeroCrossed;
+    }
+
+    if ((prevValue < currentValue) && (taskLimitsReached.value != LimitReached.start)) {
+      return Direction.forward;
+    } else if ((prevValue > currentValue) && (taskLimitsReached.value != LimitReached.end)) {
+      return Direction.inReverse;
     }
   }
 }
