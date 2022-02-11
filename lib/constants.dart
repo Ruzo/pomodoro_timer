@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 // colors
-const Color kBackgroundColor = Color(0xFF1F1B2E);
+const Color kBackgroundColor = Color.fromARGB(255, 26, 22, 38);
 const Color kBackgroundLiteColor = Color(0xFF2D2C40);
 const Color kPrimaryColor = Color(0xFF664EFF);
 const Color kAlternateColor = Color(0xAA7B1FA2);

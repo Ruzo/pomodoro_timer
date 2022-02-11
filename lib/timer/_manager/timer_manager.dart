@@ -105,7 +105,8 @@ class TimerManager {
           print('Backwards: Current session: ${tks.currentSessionIndex.value}');
 
           if (tks.currentSessionIndex.value == 0) {
-            print('Absolute zero. draggingData.currentTimeInMs: ${draggingData.currentTimeInMs}');
+            print(
+                'Absolute zero. draggingData.currentTimeInMs: ${draggingData.currentTimeInMs}');
 
             // _timerStartReached = true;
             tms.setSessionChangeFlag(status: SessionChange.beginning);
@@ -120,11 +121,14 @@ class TimerManager {
           }
         }
 
-        if (draggingData.direction == Direction.forward || draggingData.direction == Direction.inReverse) {
+        if (draggingData.direction == Direction.forward ||
+            draggingData.direction == Direction.inReverse) {
           taskLimitsReached(LimitReached.none);
         }
 
-        if (taskLimitsReached.value == LimitReached.none) tms.setTimeFromMilliseconds(_timeToBeSet);
+        if (taskLimitsReached.value == LimitReached.none) {
+          tms.setTimeFromMilliseconds(_timeToBeSet);
+        }
         tms.changingSession = false;
       },
     );
@@ -166,16 +170,24 @@ class TimerManager {
   // Calculate dragging direction and position of thumb relative to 0.00
   // BUG: fix prevValue and currentValue issue after zeroCrossed
   Direction? checkDirection(double prevValue, double currentValue) {
-    print('prevValue: $prevValue, currentValue: $currentValue, changingSession: ${tms.changingSession}');
+    print(
+        'prevValue: $prevValue, currentValue: $currentValue, changingSession: ${tms.changingSession}');
     if (!tms.changingSession) {
-      if (prevValue >= 6.0 && currentValue <= 1.0) return Direction.forwardZeroCrossed;
-      if (prevValue <= 1.0 && currentValue >= 6.0) return Direction.reverseZeroCrossed;
+      if (prevValue >= 6.0 && currentValue <= 1.0) {
+        return Direction.forwardZeroCrossed;
+      }
+      if (prevValue <= 1.0 && currentValue >= 6.0) {
+        return Direction.reverseZeroCrossed;
+      }
     }
 
-    if ((prevValue < currentValue) && (taskLimitsReached.value != LimitReached.start)) {
+    if ((prevValue < currentValue) &&
+        (taskLimitsReached.value != LimitReached.start)) {
       return Direction.forward;
-    } else if ((prevValue > currentValue) && (taskLimitsReached.value != LimitReached.end)) {
+    } else if ((prevValue > currentValue) &&
+        (taskLimitsReached.value != LimitReached.end)) {
       return Direction.inReverse;
     }
+    return null;
   }
 }
