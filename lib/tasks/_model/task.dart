@@ -19,14 +19,14 @@ class Task {
   final int currentSession;
 
   factory Task({
-    id = '',
-    title = 'No Title',
-    pomodoros = const <Pomodoro>[],
-    shortBreak = const Duration(minutes: 5),
-    longBreak = const Duration(minutes: 15),
-    longBreakInterval = 4,
-    sessions = const [],
-    currentSession = 0,
+    String id = '',
+    String title = 'No Title',
+    List<Pomodoro> pomodoros = const <Pomodoro>[],
+    Duration shortBreak = const Duration(minutes: 5),
+    Duration longBreak = const Duration(minutes: 15),
+    int longBreakInterval = 4,
+    List<Session> sessions = const [],
+    int currentSession = 0,
   }) {
     id = const Uuid().v1();
     return Task._(
