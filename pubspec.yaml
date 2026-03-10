@@ -3,31 +3,26 @@ description: A Pomodoro timer with flexible controls and timer customizations
 
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 1.0.0+1
+version: 1.1.0
 
 environment:
-  sdk: '>=2.12.0 <3.0.0'
+  sdk: '>=3.8.0 <4.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
-  cupertino_icons: ^1.0.4
-  flutter_command: ^2.0.1
-  functional_listener: ^2.1.0
-  get_it: ^7.2.0
-  get_it_mixin: ^3.1.4
-  google_fonts: ^2.3.1
-  uuid: ^3.0.5
+  cupertino_icons: ^1.0.8
+  get_it: ^7.6.4
+  signals_flutter: ^5.0.0
+  google_fonts: ^6.2.1
+  uuid: ^4.5.1
 
 dev_dependencies:
-  flutter_lints: ^1.0.4
+  flutter_lints: ^5.0.0
   flutter_test:
     sdk: flutter
 
 # dependency_overrides:
-#   get_it_mixin:
-#     git:
-#       url: https://github.com/Ruzo/get_it_mixin.git
 
 flutter:
 

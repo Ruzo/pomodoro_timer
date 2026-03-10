@@ -2,18 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:pomodoro_timer/constants.dart';
 
 //XXX Background layer
-void paintBackground(Canvas canvas, Offset _center, double _radius) {
-  var _backgroundPaint = Paint()..color = kAccentColor.withAlpha(30);
+void paintBackground(Canvas canvas, Offset center, double radius) {
+  var backgroundPaint = Paint()..color = kAccentColor.withAlpha(30);
   canvas.drawCircle(
-    _center,
-    _radius,
-    _backgroundPaint,
+    center,
+    radius,
+    backgroundPaint,
   );
 }
 
 //XXX Background progress indicator filler
-void paintBackgroundProgressIndicator(Offset _center, double _timerBkgRadius, double _currentAngle, Canvas canvas) {
-  var _timerBkgPaint = Paint()
+void paintBackgroundProgressIndicator(Offset center, double timerBkgRadius, double currentAngle, Canvas canvas) {
+  var timerBkgPaint = Paint()
     ..style = PaintingStyle.stroke
     ..strokeWidth = 40
     ..strokeCap = StrokeCap.butt
@@ -23,29 +23,29 @@ void paintBackgroundProgressIndicator(Offset _center, double _timerBkgRadius, do
       tileMode: TileMode.clamp,
       colors: const [kBackgroundLiteColor, Colors.transparent],
       stops: [
-        _currentAngle,
-        _currentAngle,
+        currentAngle,
+        currentAngle,
       ],
     ).createShader(
-      Rect.fromCircle(center: _center, radius: _timerBkgRadius),
+      Rect.fromCircle(center: center, radius: timerBkgRadius),
     );
 
   canvas.drawArc(
     Rect.fromCircle(
-      center: _center,
-      radius: _timerBkgRadius,
+      center: center,
+      radius: timerBkgRadius,
     ),
     kStartAngle,
     kSweepAngle,
     false,
-    _timerBkgPaint,
+    timerBkgPaint,
   );
 }
 
 //XXX Progress Indicator line
 Color paintProgressIndicatorLine(
-    Offset _center, double _progressLineRadius, Color _progressColor, double _currentAngle, Canvas canvas) {
-  var _progressLinePaint = Paint()
+    Offset center, double progressLineRadius, Color progressColor, double currentAngle, Canvas canvas) {
+  var progressLinePaint = Paint()
     ..style = PaintingStyle.stroke
     ..strokeWidth = 8
     ..strokeCap = StrokeCap.butt
@@ -53,68 +53,68 @@ Color paintProgressIndicatorLine(
       startAngle: kStartAngle,
       endAngle: kSweepAngle,
       colors: [
-        _progressColor.withOpacity(.05),
-        _progressColor,
-        _progressColor,
+        progressColor.withValues(alpha: .05),
+        progressColor,
+        progressColor,
         Colors.transparent,
       ],
       stops: [
         kStartAngle,
-        _currentAngle / 2,
-        _currentAngle,
-        _currentAngle,
+        currentAngle / 2,
+        currentAngle,
+        currentAngle,
       ],
     ).createShader(
-      Rect.fromCircle(center: _center, radius: _progressLineRadius),
+      Rect.fromCircle(center: center, radius: progressLineRadius),
     )
     ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 1);
 
   canvas.drawArc(
-    Rect.fromCircle(center: _center, radius: _progressLineRadius),
+    Rect.fromCircle(center: center, radius: progressLineRadius),
     kStartAngle,
     kSweepAngle,
     false,
-    _progressLinePaint,
+    progressLinePaint,
   );
-  return _progressColor;
+  return progressColor;
 }
 
 //XXX Center circle with glow shadow
-void paintCenterCircleWithGlowShadow(Color _progressColor, Canvas canvas, Offset _center, double _centerCircleRadius) {
-  var _centerCirclePaint = Paint()
+void paintCenterCircleWithGlowShadow(Color progressColor, Canvas canvas, Offset center, double centerCircleRadius) {
+  var centerCirclePaint = Paint()
     ..color = kBackgroundColor
     ..style = PaintingStyle.fill;
-  var _centerCircleGlowPaint = Paint()
-    ..color = _progressColor.withOpacity(0.5)
+  var centerCircleGlowPaint = Paint()
+    ..color = progressColor.withValues(alpha: 0.5)
     ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 20);
 
   canvas.drawCircle(
-    _center,
-    _centerCircleRadius,
-    _centerCircleGlowPaint,
+    center,
+    centerCircleRadius,
+    centerCircleGlowPaint,
   );
   canvas.drawCircle(
-    _center,
-    _centerCircleRadius,
-    _centerCirclePaint,
+    center,
+    centerCircleRadius,
+    centerCirclePaint,
   );
 }
 
 //XXX Progress indicator draggable thumb
 void paintProgressIndicatorCircleThumb(
-    Color _progressColor, Canvas canvas, double _thumbCenterDx, double _thumbCenterDy, bool dragStarted) {
-  var _progressPosCirclePaint = Paint()
+    Color progressColor, Canvas canvas, double thumbCenterDx, double thumbCenterDy, bool dragStarted) {
+  var progressPosCirclePaint = Paint()
     ..color = Colors.white
     ..style = PaintingStyle.fill;
 
-  var _progressPosCircleBorderPaint = Paint()
-    ..color = _progressColor
+  var progressPosCircleBorderPaint = Paint()
+    ..color = progressColor
     ..style = PaintingStyle.stroke
     ..strokeWidth = 5
     ..maskFilter = const MaskFilter.blur(BlurStyle.inner, 1);
 
-  var _draggingCircleBorderPaint = Paint()
-    ..color = _progressColor
+  var draggingCircleBorderPaint = Paint()
+    ..color = progressColor
     ..style = PaintingStyle.stroke
     ..strokeWidth = 2
     ..maskFilter = const MaskFilter.blur(BlurStyle.inner, 1);
@@ -124,42 +124,42 @@ void paintProgressIndicatorCircleThumb(
       ..addOval(
         Rect.fromCircle(
           center: Offset(
-            _thumbCenterDx,
-            _thumbCenterDy,
+            thumbCenterDx,
+            thumbCenterDy,
           ),
           radius: 11,
         ),
       ),
-    kBackgroundColor.withOpacity(.5),
+    kBackgroundColor.withValues(alpha: .5),
     1,
     false,
   );
 
   canvas.drawCircle(
     Offset(
-      _thumbCenterDx,
-      _thumbCenterDy,
+      thumbCenterDx,
+      thumbCenterDy,
     ),
     9,
-    _progressPosCirclePaint,
+    progressPosCirclePaint,
   );
 
   canvas.drawCircle(
     Offset(
-      _thumbCenterDx,
-      _thumbCenterDy,
+      thumbCenterDx,
+      thumbCenterDy,
     ),
     9,
-    _progressPosCircleBorderPaint,
+    progressPosCircleBorderPaint,
   );
   if (dragStarted) {
     canvas.drawCircle(
       Offset(
-        _thumbCenterDx,
-        _thumbCenterDy,
+        thumbCenterDx,
+        thumbCenterDy,
       ),
       20,
-      _draggingCircleBorderPaint,
+      draggingCircleBorderPaint,
     );
   }
 }

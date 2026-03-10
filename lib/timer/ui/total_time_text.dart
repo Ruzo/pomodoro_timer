@@ -13,10 +13,10 @@ class TotalTimeText extends StatelessWidget {
   /// Instance of Text created from total session time int
   /// and colored depending on type.
   const TotalTimeText({
-    Key? key,
+    super.key,
     required this.totalMinutes,
     required this.session,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +28,7 @@ class TotalTimeText extends StatelessWidget {
       style: TextStyle(
         fontSize: 20,
         color: (session.type == SessionType.pomodoro) //
-            ? kPrimaryColor.withOpacity(.85)
+            ? kPrimaryColor.withValues(alpha: 0.85)
             : kAlternateColor,
       ),
     );

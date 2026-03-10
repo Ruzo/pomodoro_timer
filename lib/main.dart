@@ -8,14 +8,14 @@ import 'package:pomodoro_timer/timer/_services/timer_service.dart';
 
 void main() {
   registerViewModel();
-  runApp(const PomodoroTimerApp());
+  runApp(const App());
 }
 
 void registerViewModel() {
   GetIt.I.registerSingleton<TasksService>(TasksService());
   GetIt.I.registerSingletonAsync<TasksManager>(() async {
     final tasksManager = TasksManager();
-    await tasksManager.initData.executeWithFuture();
+    await tasksManager.initData();
     return tasksManager;
   });
   GetIt.I.registerSingletonWithDependencies<TimerService>(

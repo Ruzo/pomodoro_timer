@@ -3,8 +3,8 @@ import 'package:pomodoro_timer/app_theme.dart';
 import 'package:pomodoro_timer/timer/timer_screen.dart';
 
 /// A pomodoro system timer
-class PomodoroTimerApp extends StatelessWidget {
-  const PomodoroTimerApp({Key? key}) : super(key: key);
+class App extends StatelessWidget {
+  const App({super.key});
 
   @override
   Widget build(BuildContext context) {

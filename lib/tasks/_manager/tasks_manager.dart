@@ -1,81 +1,65 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter_command/flutter_command.dart';
+import 'package:signals_flutter/signals_flutter.dart';
 import 'package:get_it/get_it.dart';
 import 'package:pomodoro_timer/tasks/_model/task.dart';
 import 'package:pomodoro_timer/tasks/_services/tasks_service.dart';
 
-class TasksManager extends ChangeNotifier {
-  late Command<void, bool> initData;
-  late Command<void, Task> getCurrentTask;
-  late Command<Task, void> setCurrentTask;
-  late Command<String, Task> getTaskById;
-  late Command<void, List<Task>> getTasksList;
-  late Command<void, bool> sessionEnded;
-  late Command<void, void> loadPrevSession;
-  late Command<bool, bool> dataIsInitialized;
-  late Command<bool, bool> taskIsDone;
+class TasksManager {
+  final Signal<bool> dataIsInitialized = signal(false);
+  final Signal<bool> taskIsDone = signal(false);
+
+  final ts = GetIt.I<TasksService>();
+
+  late final Computed<Task> getCurrentTask = computed(() => ts.selectedTask.value);
+  late final Computed<List<Task>> getTasksList = computed(() => ts.taskList.value);
 
   TasksManager() {
-    var ts = GetIt.I<TasksService>();
-
-    initData = Command.createAsyncNoParam(() async {
-      if (dataIsInitialized.value) return true;
-      print('Init Task Manager');
-
-      ts.selectedTask = await ts.init();
-
-      if (ts.currentSessionIndex.value == ts.selectedTask.sessions.length - 1) ts.lastSession = true;
-
-      getCurrentTask();
-      dataIsInitialized(true);
-
-      return dataIsInitialized.value;
-    }, false);
-
-    getCurrentTask = Command.createSyncNoParam<Task>(() {
-      return ts.selectedTask;
-    }, ts.defaultTask);
-
-    setCurrentTask = Command.createSyncNoResult((task) {
-      ts.selectedTask = task;
-      getCurrentTask();
-    });
-
-    getTaskById = Command.createAsync((id) => ts.taskById(id), Task());
-
-    getTasksList = Command.createSyncNoParam(() => ts.taskList, []);
-
-    getTaskById.thrownExceptions.listen((ex, _) => print('${ex?.error}'));
-
-    sessionEnded = Command.createSyncNoParam(() {
-      if (!taskIsDone.value) {
-        ts.setSessionAsDone(ts.currentSessionIndex.value);
-        if (ts.lastSession) {
-          taskIsDone(true);
-          ts.currentSessionIndex.notifyListeners();
-          return true;
-        }
-        ts.setCurrentSessionIndex(ts.currentSessionIndex.value + 1);
-        if (ts.currentSessionIndex.value == ts.selectedTask.sessions.length - 1) ts.lastSession = true;
-      }
-      return false;
-    }, false);
-
-    loadPrevSession = Command.createSyncNoParamNoResult(() {
-      if (ts.currentSessionIndex.value != 0) {
-        ts.setCurrentSessionIndex(ts.currentSessionIndex.value - 1);
-        ts.undoSession(ts.currentSessionIndex.value);
-        taskIsDone(false);
-        ts.lastSession = false;
-        return;
-      }
-      print('Skipping loadPreviousSession');
-    });
-
-    dataIsInitialized = Command.createSync((b) => b, false);
-
-    taskIsDone = Command.createSync((b) => b, false);
-
     initData();
   }
+
+  Future<bool> initData() async {
+    if (dataIsInitialized.value) return true;
+    print('Init Task Manager');
+
+    ts.selectedTask.value = await ts.init();
+
+    if (ts.currentSessionIndex.value == ts.selectedTask.value.sessions.length - 1) {
+      ts.lastSession.value = true;
+    }
+
+    dataIsInitialized.value = true;
+    return dataIsInitialized.value;
+  }
+
+  void setCurrentTask(Task task) {
+    ts.selectedTask.value = task;
+  }
+
+  Future<Task> getTaskById(String? id) => ts.taskById(id);
+
+  bool sessionEnded() {
+    if (!taskIsDone.value) {
+      ts.setSessionAsDone(ts.currentSessionIndex.value);
+      if (ts.lastSession.value) {
+        taskIsDone.value = true;
+        return true;
+      }
+      ts.setCurrentSessionIndex(ts.currentSessionIndex.value + 1);
+      if (ts.currentSessionIndex.value == ts.selectedTask.value.sessions.length - 1) {
+        ts.lastSession.value = true;
+      }
+    }
+    return false;
+  }
+
+  void loadPrevSession() {
+    if (ts.currentSessionIndex.value != 0) {
+      ts.setCurrentSessionIndex(ts.currentSessionIndex.value - 1);
+      ts.undoSession(ts.currentSessionIndex.value);
+      taskIsDone.value = false;
+      ts.lastSession.value = false;
+      return;
+    }
+    print('Skipping loadPreviousSession');
+  }
 }
+

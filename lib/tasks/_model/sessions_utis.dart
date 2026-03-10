@@ -7,30 +7,44 @@ List<Session> generateSessions(
   Duration longBreak,
   int longBreakInterval,
 ) {
-  var _sessionsList = <Session>[];
-  for (var i = 0; i < pomodoros.length; i++) {
-    var _lastPomodoro = pomodoros.length - 1;
-    _sessionsList.add(
+  var sessionsList = <Session>[];
+
+  if (pomodoros.isEmpty) {
+    return sessionsList;
+  }
+
+  // Add the first pomodoro
+  sessionsList.add(
+    Session(
+      duration: pomodoros.first.duration,
+      type: SessionType.pomodoro,
+    ),
+  );
+
+  for (var i = 0; i < pomodoros.length - 1; i++) {
+    // Add break session
+    if (((i + 1) % longBreakInterval == 0)) {
+      sessionsList.add(
+        Session(
+          type: SessionType.longBreak,
+          duration: longBreak,
+        ),
+      );
+    } else {
+      sessionsList.add(
+        Session(
+          type: SessionType.shortBreak,
+          duration: shortBreak,
+        ),
+      );
+    }
+    // Add the next pomodoro
+    sessionsList.add(
       Session(
-        duration: pomodoros[i].duration,
+        duration: pomodoros[i + 1].duration,
         type: SessionType.pomodoro,
       ),
     );
-    if (i != _lastPomodoro) {
-      i == longBreakInterval - 1
-          ? _sessionsList.add(
-              Session(
-                duration: longBreak,
-                type: SessionType.longBreak,
-              ),
-            )
-          : _sessionsList.add(
-              Session(
-                duration: shortBreak,
-                type: SessionType.shortBreak,
-              ),
-            );
-    }
   }
-  return _sessionsList;
+  return sessionsList;
 }

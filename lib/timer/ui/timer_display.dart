@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:get_it_mixin/get_it_mixin.dart';
+import 'package:signals_flutter/signals_flutter.dart';
 import 'package:pomodoro_timer/tasks/_services/tasks_service.dart';
 import 'package:pomodoro_timer/timer/_manager/timer_manager.dart';
-// import 'package:pomodoro_timer/timer/_services/timer_service.dart';
 import 'package:pomodoro_timer/timer/ui/timer_painter.dart';
 import 'package:pomodoro_timer/timer/ui/total_time_text.dart';
 
 import 'counter_text.dart';
 
 /// Widget box enclosing timer CustomPaint widget
-class TimerDisplay extends StatelessWidget with GetItMixin {
+class TimerDisplay extends StatelessWidget {
   /// Instance of widget box enclosing timer CustomPaint widget
-  TimerDisplay({Key? key}) : super(key: key);
+  const TimerDisplay({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -29,22 +28,29 @@ class TimerDisplay extends StatelessWidget with GetItMixin {
 }
 
 /// Widget including CustomPaint and GestureDetector for timer display
-class TimerWidget extends StatelessWidget with GetItMixin {
+class TimerWidget extends StatelessWidget {
   /// Instance of widget enclosing timer progress indicator and counter
-  TimerWidget({Key? key}) : super(key: key);
+  const TimerWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final _currentTime = watchX((TimerManager tm) => tm.getCurrentTime);
-    var _sessions = GetIt.I<TasksService>().sessions;
-    final _currentSession = watchX((TasksService s) => s.currentSessionIndex);
-    final _session = _sessions[_currentSession];
-    final _totalDuration = _sessions[_currentSession].duration;
-    final _dragStarted = watchX((TimerManager tm) => tm.dragStarted);
-    final _dragPosition = watchX((TimerManager tm) => tm.updateDragPosition);
-    final _dragging = watchX((TimerManager tm) => tm.dragging);
-    // final _taskLimitsReached = watchX((TimerManager tm) => tm.taskLimitsReached);
-    var timeChars = _currentTime.toString().split('.').first.split(':').sublist(1);
+    var tm = GetIt.I<TimerManager>();
+    var ts = GetIt.I<TasksService>();
+
+    final currentTime = tm.getCurrentTime.watch(context).inMilliseconds;
+    final sessions = ts.sessions.watch(context);
+    final currentSession = ts.currentSessionIndex.watch(context);
+
+    if (sessions.isEmpty) return const SizedBox.shrink();
+
+    var session = sessions[currentSession];
+    var totalDuration = session.duration.inMilliseconds;
+
+    bool dragStarted = tm.dragStarted.watch(context);
+    Offset dragPosition = tm.updateDragPosition.watch(context);
+    bool dragging = tm.dragging.watch(context);
+
+    var timeChars = Duration(milliseconds: currentTime).toString().split('.').first.split(':').sublist(1);
 
     // dragStarted does not work with painter hitTest unless added to shoulRepaint!
     return GestureDetector(
@@ -52,13 +58,12 @@ class TimerWidget extends StatelessWidget with GetItMixin {
         key: const Key('painter'),
         isComplex: true,
         painter: TimerPainter(
-          totalMs: _totalDuration.inMilliseconds,
-          currentMs: _currentTime.inMilliseconds,
-          sessionType: _session.type,
-          dragPosition: _dragPosition,
-          dragStarted: _dragStarted,
-          dragging: _dragging,
-          // limitsReached: _taskLimitsReached,
+          totalMs: totalDuration,
+          currentMs: currentTime,
+          sessionType: session.type,
+          dragPosition: dragPosition,
+          dragStarted: dragStarted,
+          dragging: dragging,
         ),
         child: IgnorePointer(
           ignoring: true,
@@ -73,8 +78,8 @@ class TimerWidget extends StatelessWidget with GetItMixin {
                   const Padding(padding: EdgeInsets.all(15)),
                   CounterText(text: timeChars.join(':')),
                   TotalTimeText(
-                    totalMinutes: _totalDuration.inMinutes,
-                    session: _session,
+                    totalMinutes: Duration(milliseconds: totalDuration).inMinutes,
+                    session: session,
                   ),
                 ],
               ),
@@ -83,13 +88,13 @@ class TimerWidget extends StatelessWidget with GetItMixin {
         ),
       ),
       onPanStart: (details) {
-        get<TimerManager>().dragStarted(true);
+        tm.setDragStartedState(true);
       },
       onPanUpdate: (details) {
-        get<TimerManager>().updateDragPosition(details.localPosition);
+        tm.setDragPosition(details.localPosition);
       },
       onPanEnd: (details) {
-        get<TimerManager>().dragStarted(false);
+        tm.setDragStartedState(false);
       },
     );
   }

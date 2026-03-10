@@ -6,17 +6,17 @@ import 'package:pomodoro_timer/timer/ui/pomodoro_indicator.dart';
 import 'package:pomodoro_timer/timer/ui/timer_display.dart';
 
 class TimerScreen extends StatelessWidget {
-  const TimerScreen({Key? key}) : super(key: key);
+  const TimerScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
         extendBody: true,
-        backgroundColor: Theme.of(context).backgroundColor,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         appBar: AppBar(
           elevation: 0.0,
-          backgroundColor: Theme.of(context).backgroundColor,
+          backgroundColor: Theme.of(context).colorScheme.surface,
           title: const Center(
             child: Text(
               'Pomodoro timer',

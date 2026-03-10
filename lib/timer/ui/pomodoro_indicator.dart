@@ -1,20 +1,22 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:get_it_mixin/get_it_mixin.dart';
+import 'package:signals_flutter/signals_flutter.dart';
 import 'package:pomodoro_timer/constants.dart';
 import 'package:pomodoro_timer/tasks/_model/session.dart';
 import 'package:pomodoro_timer/tasks/_services/tasks_service.dart';
 import 'package:pomodoro_timer/timer/_services/timer_service.dart';
 
 /// Widget for progress indicator showing current session within the task.
-class PomodoroIndicator extends StatelessWidget with GetItMixin {
-  PomodoroIndicator({Key? key}) : super(key: key);
+class PomodoroIndicator extends StatelessWidget {
+  const PomodoroIndicator({super.key});
 
   @override
   Widget build(BuildContext context) {
-    var _sessions = GetIt.I<TasksService>().sessions;
-    final _currentSession = watchX((TasksService s) => s.currentSessionIndex);
+    var ts = GetIt.I<TasksService>();
+    var sessions = ts.sessions.watch(context);
+    final currentSession = ts.currentSessionIndex.watch(context);
+    
     return Center(
       child: SizedBox(
         height: 20,
@@ -25,9 +27,8 @@ class PomodoroIndicator extends StatelessWidget with GetItMixin {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               IndicatorItemsList(
-                context: context,
-                sessions: _sessions,
-                currentSession: _currentSession,
+                sessions: sessions,
+                currentSession: currentSession,
               ),
             ],
           ),
@@ -38,16 +39,14 @@ class PomodoroIndicator extends StatelessWidget with GetItMixin {
 }
 
 class IndicatorItemsList extends StatelessWidget {
-  final BuildContext context;
   final List<Session> sessions;
   final int currentSession;
 
   const IndicatorItemsList({
-    Key? key,
-    required this.context,
+    super.key,
     required this.sessions,
     required this.currentSession,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -68,10 +67,10 @@ class IndicatorItemsList extends StatelessWidget {
                   color: (isCurrent && !session.done)
                       ? kBackgroundColor
                       : session.done
-                          ? kPrimaryColor.withOpacity(.85)
+                          ? kPrimaryColor.withValues(alpha: .85)
                           : kBackgroundLiteColor,
                   border: Border.all(
-                    color: (isCurrent && !session.done) ? kPrimaryColor.withOpacity(.85) : Colors.transparent,
+                    color: (isCurrent && !session.done) ? kPrimaryColor.withValues(alpha: .85) : Colors.transparent,
                     width: 4,
                   ),
                 ),
@@ -92,8 +91,6 @@ class IndicatorItemsList extends StatelessWidget {
                 width: 30.0,
                 isCurrent: isCurrent,
               );
-            default:
-              return Container();
           }
         },
       ),
@@ -108,12 +105,12 @@ class BreakLineWidget extends StatelessWidget {
   final bool isCurrent;
 
   const BreakLineWidget({
-    Key? key,
+    super.key,
     required this.context,
     required this.session,
     required this.width,
     required this.isCurrent,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -122,18 +119,16 @@ class BreakLineWidget extends StatelessWidget {
         Container(
           height: 2,
           width: width,
-          color: session.done ? kPrimaryColor.withOpacity(.85) : kBackgroundLiteColor,
+          color: session.done ? kPrimaryColor.withValues(alpha: .85) : kBackgroundLiteColor,
         ),
-        ValueListenableBuilder<double>(
-          valueListenable: GetIt.I<TimerService>().percentageDone,
-          builder: (context, percent, _) {
-            return Container(
-              height: 2,
-              width: isCurrent ? (width * percent) : width,
-              color: (session.done || isCurrent) ? kPrimaryColor.withOpacity(.85) : kBackgroundLiteColor,
-            );
-          },
-        ),
+        Watch((context) {
+          final percent = GetIt.I<TimerService>().percentageDone.value;
+          return Container(
+            height: 2,
+            width: isCurrent ? (width * percent) : width,
+            color: (session.done || isCurrent) ? kPrimaryColor.withValues(alpha: .85) : kBackgroundLiteColor,
+          );
+        }),
       ],
     );
   }

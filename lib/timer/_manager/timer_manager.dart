@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter_command/flutter_command.dart';
+import 'package:signals_flutter/signals_flutter.dart';
 import 'package:get_it/get_it.dart';
 import 'package:pomodoro_timer/constants.dart';
 import 'package:pomodoro_timer/tasks/_manager/tasks_manager.dart';
@@ -9,152 +9,66 @@ import 'package:pomodoro_timer/timer/_models/dragging_data.dart';
 import 'package:pomodoro_timer/timer/_services/timer_service.dart';
 
 class TimerManager {
-  late Command<void, bool> initTimer;
-  late Command<void, Duration> getCurrentTime;
-  late Command<DraggingData, void> setTimeFromDrag;
-  late Command<void, void> startTimer;
-  late Command<void, void> stopTimer;
-  late Command<void, void> resetTimer;
-  late Command<void, void> cancelTimer;
-  late Command<bool, bool> dragStarted;
-  late Command<Offset, Offset> updateDragPosition;
-  late Command<bool, bool> dragging;
-  late Command<LimitReached, LimitReached> taskLimitsReached;
-
   TimerService tms = GetIt.I<TimerService>();
   TasksService tks = GetIt.I<TasksService>();
   TasksManager tkm = GetIt.I<TasksManager>();
-  // bool _timerStartReached = false;
-  // bool _timerEndReached = false;
+
+  final Signal<bool> dragStarted = signal(false);
+  final Signal<Offset> updateDragPosition = signal(Offset.zero);
+  final Signal<bool> dragging = signal(false);
+  final Signal<LimitReached> taskLimitsReached = signal(LimitReached.none);
+  bool _changingSession = false;
+
+  late final Computed<Duration> getCurrentTime = computed(() => tms.currentTime.value);
 
   TimerManager() {
-    tms.currentTime.listen((currentTime, _) {
-      if ((currentTime >= tks.currentSession.duration) && !dragging.value) {
-        nextSession();
+    effect(() {
+      final currentTime = tms.currentTime.value;
+      if (tks.sessions.value.isNotEmpty && tks.sessions.value.length > tks.currentSessionIndex.value) {
+        if (currentTime >= tks.currentSession.duration && !dragging.peek()) {
+          nextSession();
+        }
       }
-      getCurrentTime();
     });
-
-    initTimer = Command.createSyncNoParam<bool>(
-      tms.init,
-      false,
-    );
-
-    startTimer = Command.createSyncNoParamNoResult(
-      () {
-        tms.start();
-        print('timer started');
-      },
-    );
-
-    stopTimer = Command.createSyncNoParamNoResult(
-      () {
-        tms.pause();
-        print('timer stopped');
-      },
-    );
-
-    resetTimer = Command.createSyncNoParamNoResult(() {
-      print('Resetting timer');
-      tms.resetTimerToZero();
-    });
-
-    cancelTimer = Command.createSyncNoParamNoResult(() {
-      print('Cancelling timer');
-      tms.cancelTimer();
-    });
-
-    getCurrentTime = Command.createSyncNoParam<Duration>(
-      () => tms.currentTime.value,
-      Duration.zero,
-    );
-
-    setTimeFromDrag = Command.createSyncNoResult(
-      (DraggingData draggingData) {
-        if (draggingData.direction == null) {
-          print('Direction is null. Returning from setTimeFromDrag');
-          return;
-        }
-        var _timeToBeSet = draggingData.currentTimeInMs;
-        var totalTimeinMs = tks.currentSession.duration.inMilliseconds;
-
-        if (draggingData.direction == Direction.forwardZeroCrossed) {
-          if (taskLimitsReached.value == LimitReached.end) return;
-
-          if (tks.lastSession || tkm.taskIsDone.value) {
-            // _timerEndReached = true;
-            _timeToBeSet = totalTimeinMs;
-
-            tms.setSessionChangeFlag(status: SessionChange.end);
-            tms.setTimeFromMilliseconds(_timeToBeSet);
-
-            taskLimitsReached(LimitReached.end);
-          } else {
-            // _timerEndReached = false;
-            taskLimitsReached(LimitReached.none);
-
-            tms.setSessionChangeFlag(status: SessionChange.forward);
-            _timeToBeSet = draggingData.currentTimeInMs;
-          }
-
-          return;
-        }
-
-        if (draggingData.direction == Direction.reverseZeroCrossed) {
-          if (taskLimitsReached.value == LimitReached.start) return;
-          print('Backwards: Current session: ${tks.currentSessionIndex.value}');
-
-          if (tks.currentSessionIndex.value == 0) {
-            print(
-                'Absolute zero. draggingData.currentTimeInMs: ${draggingData.currentTimeInMs}');
-
-            // _timerStartReached = true;
-            tms.setSessionChangeFlag(status: SessionChange.beginning);
-            taskLimitsReached(LimitReached.start);
-            _timeToBeSet = 0;
-          } else {
-            // _timerStartReached = false;
-            taskLimitsReached(LimitReached.none);
-            tms.setTimeFromMilliseconds(_timeToBeSet);
-            tms.setSessionChangeFlag(status: SessionChange.backward);
-            // _timeToBeSet = tks.currentSession.duration.inMilliseconds - 1000;
-          }
-        }
-
-        if (draggingData.direction == Direction.forward ||
-            draggingData.direction == Direction.inReverse) {
-          taskLimitsReached(LimitReached.none);
-        }
-
-        if (taskLimitsReached.value == LimitReached.none) {
-          tms.setTimeFromMilliseconds(_timeToBeSet);
-        }
-        tms.changingSession = false;
-      },
-    );
-
-    dragStarted = Command.createSync((dragStart) {
-      tms.setDragStartedState(dragStarted: dragStart);
-      if (!dragStart) {
-        dragging(false);
-      }
-
-      return dragStart;
-    }, false);
-
-    updateDragPosition = Command.createSync((position) {
-      dragging(true);
-      return position;
-    }, Offset.zero);
-
-    dragging = Command.createSync((status) => status, false);
-
-    taskLimitsReached = Command.createSync((status) {
-      print('taskLimitsReached: $status');
-      return status;
-    }, LimitReached.none);
 
     initTimer();
+  }
+
+  void initTimer() {
+    tms.init();
+  }
+
+  void startTimer() {
+    tms.start();
+    print('timer started');
+  }
+
+  void stopTimer() {
+    tms.pause();
+    print('timer stopped');
+  }
+
+  void resetTimer() {
+    print('Resetting timer');
+    tms.resetTimerToZero();
+  }
+
+  void cancelTimer() {
+    print('Cancelling timer');
+    tms.cancelTimer();
+  }
+
+  void setDragStartedState(bool dragStart) {
+    tms.setDragStartedState(dragStarted: dragStart);
+    dragStarted.value = dragStart;
+    if (!dragStart) {
+      dragging.value = false;
+    }
+  }
+
+  void setDragPosition(Offset position) {
+    updateDragPosition.value = position;
+    dragging.value = true;
   }
 
   void nextSession() {
@@ -167,12 +81,88 @@ class TimerManager {
     }
   }
 
-  // Calculate dragging direction and position of thumb relative to 0.00
-  // BUG: fix prevValue and currentValue issue after zeroCrossed
+  void setTimeFromDrag(DraggingData draggingData) {
+    if (draggingData.direction == null) {
+      print('Direction is null. Returning from setTimeFromDrag');
+      return;
+    }
+    
+    var timeToBeSet = draggingData.currentTimeInMs;
+    if (tks.sessions.value.isEmpty || tks.sessions.value.length <= tks.currentSessionIndex.value) return;
+    var totalTimeinMs = tks.currentSession.duration.inMilliseconds;
+
+    if (draggingData.direction == Direction.forwardZeroCrossed) {
+      if (taskLimitsReached.value == LimitReached.end) return;
+
+      if (tks.lastSession.value || tkm.taskIsDone.value) {
+        timeToBeSet = totalTimeinMs;
+
+        tms.changeSession(SessionChange.end);
+        tms.setTimeFromMilliseconds(timeToBeSet);
+
+        taskLimitsReached.value = LimitReached.end;
+      } else {
+        taskLimitsReached.value = LimitReached.none;
+
+        _changingSession = true;
+        tms.changeSession(SessionChange.forward);
+        
+        // Ratio of overshoot
+        double overflowRatio = draggingData.currentTimeInMs / totalTimeinMs;
+        int newTotal = tks.currentSession.duration.inMilliseconds;
+        timeToBeSet = (newTotal * overflowRatio).toInt().clamp(0, newTotal);
+        
+        tms.setTimeFromMilliseconds(timeToBeSet);
+        tms.updateCurrentTime(Duration(milliseconds: timeToBeSet));
+        _changingSession = false;
+      }
+
+      return;
+    }
+
+    if (draggingData.direction == Direction.reverseZeroCrossed) {
+      if (taskLimitsReached.value == LimitReached.start) return;
+      print('Backwards: Current session: ${tks.currentSessionIndex.value}');
+
+      if (tks.currentSessionIndex.value == 0) {
+        print(
+            'Absolute zero. draggingData.currentTimeInMs: ${draggingData.currentTimeInMs}');
+
+        tms.changeSession(SessionChange.beginning);
+        taskLimitsReached.value = LimitReached.start;
+        timeToBeSet = 0;
+      } else {
+        taskLimitsReached.value = LimitReached.none;
+        
+        _changingSession = true;
+        tms.changeSession(SessionChange.backward);
+        
+        // Ratio of undershoot
+        double remainingRatio = draggingData.currentTimeInMs / totalTimeinMs;
+        int newTotal = tks.currentSession.duration.inMilliseconds;
+        timeToBeSet = (newTotal * remainingRatio).toInt().clamp(0, newTotal);
+
+        tms.setTimeFromMilliseconds(timeToBeSet);
+        tms.updateCurrentTime(Duration(milliseconds: timeToBeSet));
+        _changingSession = false;
+      }
+      return;
+    }
+
+    if (draggingData.direction == Direction.forward ||
+        draggingData.direction == Direction.inReverse) {
+      taskLimitsReached.value = LimitReached.none;
+    }
+
+    if (taskLimitsReached.value == LimitReached.none) {
+      tms.setTimeFromMilliseconds(timeToBeSet);
+    }
+  }
+
   Direction? checkDirection(double prevValue, double currentValue) {
     print(
-        'prevValue: $prevValue, currentValue: $currentValue, changingSession: ${tms.changingSession}');
-    if (!tms.changingSession) {
+        'prevValue: $prevValue, currentValue: $currentValue, changingSession: $_changingSession');
+    if (!_changingSession) {
       if (prevValue >= 6.0 && currentValue <= 1.0) {
         return Direction.forwardZeroCrossed;
       }

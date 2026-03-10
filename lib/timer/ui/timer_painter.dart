@@ -65,77 +65,77 @@ class TimerPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    var _center = size.center(Offset.zero);
-    var _radius = min(size.width, size.height) / 2;
-    var _centerX = size.width / 2;
-    var _centerY = size.height / 2;
-    var _timerBkgRadius = _radius - 20;
-    var _progressLineRadius = _radius - 35;
-    var _centerCircleRadius = _radius - 40;
-    var _progressColor = sessionType == SessionType.pomodoro //
+    var center = size.center(Offset.zero);
+    var radius = min(size.width, size.height) / 2;
+    var centerX = size.width / 2;
+    var centerY = size.height / 2;
+    var timerBkgRadius = radius - 20;
+    var progressLineRadius = radius - 35;
+    var centerCircleRadius = radius - 40;
+    var progressColor = sessionType == SessionType.pomodoro //
         ? kPrimaryColor
         : kAlternateColor;
     limitsReached = tm.taskLimitsReached.value;
 
     // move 0 degree to top
-    canvas.translate(_centerX, _centerY);
+    canvas.translate(centerX, centerY);
     canvas.rotate(1.5 * pi);
-    canvas.translate(-_centerX, -_centerY);
+    canvas.translate(-centerX, -centerY);
 
     // Background layer
-    paintBackground(canvas, _center, _radius);
+    paintBackground(canvas, center, radius);
 
     // Background progress indicator filler
-    paintBackgroundProgressIndicator(_center, _timerBkgRadius, _currentAngle, canvas);
+    paintBackgroundProgressIndicator(center, timerBkgRadius, _currentAngle, canvas);
 
     // Progress Indicator line
-    paintProgressIndicatorLine(_center, _progressLineRadius, _progressColor, _currentAngle, canvas);
+    paintProgressIndicatorLine(center, progressLineRadius, progressColor, _currentAngle, canvas);
 
     // Center circle with glow shadow
-    paintCenterCircleWithGlowShadow(_progressColor, canvas, _center, _centerCircleRadius);
+    paintCenterCircleWithGlowShadow(progressColor, canvas, center, centerCircleRadius);
 
     //XXX Thumb @ Progress Indicator line pos XXX
     if (dragging) {
-      var _deltaX = (300 - dragPosition.dy) - _center.dx;
-      var _deltaY = dragPosition.dx - _center.dy;
+      var deltaX = (300 - dragPosition.dy) - center.dx;
+      var deltaY = dragPosition.dx - center.dy;
 
-      var _dragRadians = atan2(_deltaY, _deltaX);
+      var dragRadians = atan2(deltaY, deltaX);
       print('totalMs: $totalMs, currentMs: $currentMs, limitsReached: $limitsReached');
 
-      var _timeRadians = convertToFullCircle(_dragRadians);
-      var _direction = tm.checkDirection(_prevRadians, _timeRadians);
-      print('direction: $_direction');
+      var timeRadians = convertToFullCircle(dragRadians);
+      var direction = tm.checkDirection(_prevRadians, timeRadians);
+      print('direction: $direction');
 
-      if (_direction == null) return;
-      if (((_direction == Direction.forward || _direction == Direction.forwardZeroCrossed) &&
+      if (direction == null) return;
+      if (((direction == Direction.forward || direction == Direction.forwardZeroCrossed) &&
               limitsReached == LimitReached.end) ||
-          ((_direction == Direction.inReverse || _direction == Direction.reverseZeroCrossed) &&
+          ((direction == Direction.inReverse || direction == Direction.reverseZeroCrossed) &&
               limitsReached == LimitReached.start)) {
         print('Not setting time from drag');
         return;
       }
 
-      var _draggingTimeInMs = ((totalMs / kSweepAngle) * _timeRadians).toInt();
+      var draggingTimeInMs = ((totalMs / kSweepAngle) * timeRadians).toInt();
       print('Setting time from drag');
-      tm.setTimeFromDrag(DraggingData(currentTimeInMs: _draggingTimeInMs, direction: _direction));
-      _prevRadians = _timeRadians;
+      tm.setTimeFromDrag(DraggingData(currentTimeInMs: draggingTimeInMs, direction: direction));
+      _prevRadians = timeRadians;
     } else {
       _prevRadians = _thumbRadians;
     }
 
-    var _thumbCenterDx = _center.dx + (_progressLineRadius * cos(_thumbRadians));
-    var _thumbCenterDy = _center.dy + (_progressLineRadius * sin(_thumbRadians));
+    var thumbCenterDx = center.dx + (progressLineRadius * cos(_thumbRadians));
+    var thumbCenterDy = center.dy + (progressLineRadius * sin(_thumbRadians));
     // print('ThumbX: $thumbCenterDx, ThumbY: $thumbCenterDy');
 
-    paintProgressIndicatorCircleThumb(_progressColor, canvas, _thumbCenterDx, _thumbCenterDy, dragStarted);
+    paintProgressIndicatorCircleThumb(progressColor, canvas, thumbCenterDx, thumbCenterDy, dragStarted);
 
     _hitPath = Path()
       ..addOval(
         Rect.fromCircle(
             // hitTest path Offset does not take canvas translate and rotation into account!
             center: Offset(
-              _center.dx + (_progressLineRadius) * sin(_thumbRadians),
-              _center.dy - (_progressLineRadius) * cos(_thumbRadians),
+              center.dx + (progressLineRadius) * sin(_thumbRadians),
+              center.dy - (progressLineRadius) * cos(_thumbRadians),
             ),
             radius: 20),
       );
@@ -143,9 +143,9 @@ class TimerPainter extends CustomPainter {
 
   @override
   bool hitTest(Offset position) {
-    var _hit = _hitPath.contains(position);
-    // print(_hit);
-    return _hit;
+    var hit = _hitPath.contains(position);
+    // print(hit);
+    return hit;
   }
 
   @override
