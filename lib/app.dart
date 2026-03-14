@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pomodoro_timer/app_theme.dart';
-import 'package:pomodoro_timer/timer/timer_screen.dart';
+import 'package:pomodoro_timer/router.dart';
 
 /// A pomodoro system timer
 class App extends StatelessWidget {
@@ -8,13 +8,9 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       theme: darkTheme,
-      home: LayoutBuilder(
-        builder: (context, constraints) {
-          return const TimerScreen();
-        },
-      ),
+      routerConfig: router,
     );
   }
 }
